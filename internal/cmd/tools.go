@@ -12,7 +12,7 @@ import (
 	"github.com/spf13/cobra"
 	"github.com/spf13/viper"
 
-	"example.invalid/mcp-template-module-placeholder/pkg/toolset"
+	"github.com/futuretea/keycloak-mcp-server/pkg/toolset"
 )
 
 func newToolsCommand(streams IOStreams, cfgFile *string, v *viper.Viper) *cobra.Command {
@@ -32,8 +32,8 @@ func newToolsListCommand(streams IOStreams, cfgFile *string, v *viper.Viper) *co
 	command := &cobra.Command{
 		Use:   "list",
 		Short: "list enabled tools",
-		Example: `  mcp-template-binary-placeholder tools list
-  mcp-template-binary-placeholder tools list --json`,
+		Example: `  keycloak tools list
+  keycloak tools list --json`,
 		RunE: func(cmd *cobra.Command, args []string) error {
 			cfg, err := loadCLIConfig(cmd, *cfgFile, v)
 			if err != nil {
@@ -59,8 +59,8 @@ func newToolsDescribeCommand(streams IOStreams, cfgFile *string, v *viper.Viper)
 		Use:     "describe <tool-name>",
 		Aliases: []string{"schema"},
 		Short:   "describe an enabled tool schema",
-		Example: `  mcp-template-binary-placeholder tools describe echo
-  mcp-template-binary-placeholder tools describe echo --json`,
+		Example: `  keycloak tools describe keycloak_users_get_users
+  keycloak tools describe keycloak_users_get_users --json`,
 		Args: cobra.ExactArgs(1),
 		RunE: func(cmd *cobra.Command, args []string) error {
 			cfg, err := loadCLIConfig(cmd, *cfgFile, v)
@@ -73,7 +73,7 @@ func newToolsDescribeCommand(streams IOStreams, cfgFile *string, v *viper.Viper)
 			}
 			tool, ok := findTool(tools, args[0])
 			if !ok {
-				return fmt.Errorf("unknown tool %q; run 'mcp-template-binary-placeholder tools list' to see available tools", args[0])
+				return fmt.Errorf("unknown tool %q; run 'keycloak tools list' to see available tools", args[0])
 			}
 			description := newToolDescription(tool)
 			if jsonOutput {
@@ -94,9 +94,8 @@ func newToolsCallCommand(streams IOStreams, cfgFile *string, v *viper.Viper) *co
 	command := &cobra.Command{
 		Use:   "call <tool-name>",
 		Short: "call an enabled tool with JSON parameters",
-		Example: `  mcp-template-binary-placeholder tools call echo --params '{"message":"hello"}'
-  echo '{"message":"hello"}' | mcp-template-binary-placeholder tools call echo --params-file -
-  mcp-template-binary-placeholder tools call ping --params '{}'`,
+		Example: `  keycloak tools call keycloak_users_get_users --params '{"max":10}'
+  echo '{"max":10}' | keycloak tools call keycloak_users_get_users --params-file -`,
 		Args: cobra.ExactArgs(1),
 		RunE: func(cmd *cobra.Command, args []string) error {
 			cfg, err := loadCLIConfig(cmd, *cfgFile, v)
@@ -113,7 +112,7 @@ func newToolsCallCommand(streams IOStreams, cfgFile *string, v *viper.Viper) *co
 			}
 			tool, ok := findTool(tools, args[0])
 			if !ok {
-				return fmt.Errorf("unknown tool %q; run 'mcp-template-binary-placeholder tools list' to see available tools", args[0])
+				return fmt.Errorf("unknown tool %q; run 'keycloak tools list' to see available tools", args[0])
 			}
 			result, err := tool.Handler(cmd.Context(), params)
 			if err != nil {

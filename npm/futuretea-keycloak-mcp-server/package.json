@@ -1,0 +1,17 @@
+{
+  "name": "@futuretea/keycloak-mcp-server",
+  "version": "0.0.0",
+  "description": "MCP server binary launcher",
+  "main": "./bin/index.js",
+  "bin": {
+    "keycloak": "bin/index.js"
+  },
+  "optionalDependencies": {
+    "@futuretea/keycloak-mcp-server-darwin-amd64": "0.0.0",
+    "@futuretea/keycloak-mcp-server-darwin-arm64": "0.0.0",
+    "@futuretea/keycloak-mcp-server-linux-amd64": "0.0.0",
+    "@futuretea/keycloak-mcp-server-linux-arm64": "0.0.0",
+    "@futuretea/keycloak-mcp-server-windows-amd64": "0.0.0"
+  },
+  "license": "MIT"
+}

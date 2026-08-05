@@ -50,8 +50,46 @@ assert_actions_pinned() {
 
 copy_template() {
   local destination=$1
+  local module binary image file
+
   mkdir -p "$destination"
   cp -R "$template_root"/. "$destination"
+
+  if grep -Fq 'example.invalid/mcp-template-module-placeholder' "$destination/go.mod"; then
+    return
+  fi
+
+  module=$(awk '$1 == "module" { print $2; exit }' "$destination/go.mod")
+  binary=$(awk '$1 == "BINARY_NAME" { print $3; exit }' "$destination/Makefile")
+  image=$(awk '/^[[:space:]]*-t / { print $2; exit }' "$destination/Makefile")
+  image=${image%:\$\(DOCKER_TAG\)}
+
+  [ -n "$module" ] || fail 'could not derive initialized module path'
+  [ -n "$binary" ] || fail 'could not derive initialized binary name'
+  [ -n "$image" ] || fail 'could not derive initialized image name'
+
+  rm -rf "$destination/.github" "$destination/npm" "$destination/release.mk"
+
+  SOURCE_VALUE="$image" TARGET_VALUE='mcp-template-image-placeholder' \
+    perl -pi -e 's/\Q$ENV{SOURCE_VALUE}\E/$ENV{TARGET_VALUE}/g' \
+    "$destination/Makefile" "$destination/README.md" "$destination/README.zh.md"
+  SOURCE_VALUE="$module" TARGET_VALUE='example.invalid/mcp-template-module-placeholder' \
+    perl -pi -e 's/\Q$ENV{SOURCE_VALUE}\E/$ENV{TARGET_VALUE}/g' \
+    "$destination/go.mod" "$destination/Makefile" "$destination/Dockerfile" \
+    "$destination/README.md" "$destination/README.zh.md"
+  SOURCE_VALUE="$binary" TARGET_VALUE='mcp-template-binary-placeholder' \
+    perl -pi -e 's/\Q$ENV{SOURCE_VALUE}\E/$ENV{TARGET_VALUE}/g' \
+    "$destination/Makefile" "$destination/Dockerfile" "$destination/README.md" \
+    "$destination/README.zh.md"
+
+  while IFS= read -r file; do
+    SOURCE_VALUE="$module" TARGET_VALUE='example.invalid/mcp-template-module-placeholder' \
+      perl -pi -e 's/\Q$ENV{SOURCE_VALUE}\E/$ENV{TARGET_VALUE}/g' "$file"
+    SOURCE_VALUE="$binary" TARGET_VALUE='mcp-template-binary-placeholder' \
+      perl -pi -e 's/\Q$ENV{SOURCE_VALUE}\E/$ENV{TARGET_VALUE}/g' "$file"
+  done < <(find "$destination/cmd" "$destination/internal" "$destination/pkg" "$destination/test" -type f -name '*.go' -print)
+
+  perl -pi -e 's/^-include release\.mk$/# __MCP_RELEASE_INCLUDE__/' "$destination/Makefile"
 }
 
 initialize() {

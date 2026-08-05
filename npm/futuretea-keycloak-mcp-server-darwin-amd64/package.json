@@ -1,0 +1,8 @@
+{
+  "name": "@futuretea/keycloak-mcp-server-darwin-amd64",
+  "version": "0.0.0",
+  "description": "MCP server binary for darwin/amd64",
+  "files": ["bin/keycloak"],
+  "os": ["darwin"],
+  "cpu": ["x64"]
+}

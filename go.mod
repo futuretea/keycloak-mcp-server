@@ -1,4 +1,4 @@
-module example.invalid/mcp-template-module-placeholder
+module github.com/futuretea/keycloak-mcp-server
 
 go 1.25.10
 

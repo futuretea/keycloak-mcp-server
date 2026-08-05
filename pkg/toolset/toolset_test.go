@@ -5,7 +5,7 @@ import (
 
 	"github.com/mark3labs/mcp-go/mcp"
 
-	"example.invalid/mcp-template-module-placeholder/pkg/toolset"
+	"github.com/futuretea/keycloak-mcp-server/pkg/toolset"
 )
 
 func TestFilterTools(t *testing.T) {
@@ -13,6 +13,9 @@ func TestFilterTools(t *testing.T) {
 		{Tool: mcp.NewTool("echo"), Domain: "example"},
 		{Tool: mcp.NewTool("ping"), Domain: "example"},
 		{Tool: mcp.NewTool("other"), Domain: "other"},
+		{Tool: mcp.NewTool("write"), Domain: "other", IsWrite: true},
+		{Tool: mcp.NewTool("read-secret"), Domain: "other", IsSensitive: true},
+		{Tool: mcp.NewTool("global-read"), Domain: "other", IsGlobal: true},
 	}
 
 	tests := []struct {
@@ -36,12 +39,22 @@ func TestFilterTools(t *testing.T) {
 		{
 			name: "disabled domain",
 			opts: toolset.FilterOptions{DisabledDomains: []string{"example"}},
-			want: []string{"other"},
+			want: []string{"other", "write", "read-secret", "global-read"},
 		},
 		{
 			name: "filters everything",
 			opts: toolset.FilterOptions{EnabledTools: []string{"missing"}},
 			want: nil,
+		},
+		{
+			name: "read-only cannot be overridden by enabled tool",
+			opts: toolset.FilterOptions{ReadOnly: true, EnabledTools: []string{"write", "read-secret", "global-read", "other"}},
+			want: []string{"other"},
+		},
+		{
+			name: "read-write explicitly allows sensitive tools",
+			opts: toolset.FilterOptions{EnabledTools: []string{"read-secret", "global-read"}},
+			want: []string{"read-secret", "global-read"},
 		},
 	}
 

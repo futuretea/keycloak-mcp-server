@@ -2,6 +2,13 @@ port: 0
 listen: 127.0.0.1
 sse_base_url: ""
 log_level: info
+keycloak_url: "http://127.0.0.1:8081"
+keycloak_realm: "master"
+keycloak_client_id: "keycloak-mcp"
+# Set MCP_KEYCLOAK_CLIENT_SECRET in the environment instead of committing a value.
+keycloak_client_secret: ""
+read_only: true
+request_timeout_seconds: 30
 enabled_tools: []
 disabled_tools: []
 enabled_domains: []

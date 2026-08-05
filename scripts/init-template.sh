@@ -75,7 +75,7 @@ replace_go_sources() {
   local file=''
   while IFS= read -r file; do
     replace_files "$source_value" "$target_value" "$file"
-  done < <(find cmd internal pkg -type f -name '*.go' -print)
+  done < <(find cmd internal pkg test -type f -name '*.go' -print)
 }
 
 while [ "$#" -gt 0 ]; do

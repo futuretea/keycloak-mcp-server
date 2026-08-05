@@ -16,9 +16,12 @@ type Toolset interface {
 
 // ServerTool combines an MCP tool definition with its handler.
 type ServerTool struct {
-	Tool    mcp.Tool
-	Handler ToolHandler
-	Domain  string
+	Tool        mcp.Tool
+	Handler     ToolHandler
+	Domain      string
+	IsWrite     bool
+	IsSensitive bool
+	IsGlobal    bool
 }
 
 // ToolHandler handles a tool call.
@@ -26,6 +29,7 @@ type ToolHandler func(ctx context.Context, params map[string]any) (string, error
 
 // FilterOptions controls which tools are exposed.
 type FilterOptions struct {
+	ReadOnly        bool
 	EnabledTools    []string
 	DisabledTools   []string
 	EnabledDomains  []string
@@ -44,6 +48,9 @@ func FilterTools(tools []ServerTool, opts FilterOptions) []ServerTool {
 		name := tool.Tool.Name
 		domain := tool.Domain
 
+		if opts.ReadOnly && (tool.IsWrite || tool.IsSensitive || tool.IsGlobal) {
+			continue
+		}
 		if len(enabledTools) > 0 {
 			if _, ok := enabledTools[name]; !ok {
 				continue

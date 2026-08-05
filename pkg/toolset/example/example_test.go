@@ -5,8 +5,8 @@ import (
 	"strings"
 	"testing"
 
-	"example.invalid/mcp-template-module-placeholder/pkg/toolset"
-	"example.invalid/mcp-template-module-placeholder/pkg/toolset/example"
+	"github.com/futuretea/keycloak-mcp-server/pkg/toolset"
+	"github.com/futuretea/keycloak-mcp-server/pkg/toolset/example"
 )
 
 func TestExampleTools(t *testing.T) {

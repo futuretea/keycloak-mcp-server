@@ -12,10 +12,10 @@ import (
 	"github.com/mark3labs/mcp-go/server"
 	"github.com/rs/zerolog/log"
 
-	"example.invalid/mcp-template-module-placeholder/internal/toolcatalog"
-	"example.invalid/mcp-template-module-placeholder/pkg/core/config"
-	"example.invalid/mcp-template-module-placeholder/pkg/core/version"
-	"example.invalid/mcp-template-module-placeholder/pkg/toolset"
+	"github.com/futuretea/keycloak-mcp-server/internal/toolcatalog"
+	"github.com/futuretea/keycloak-mcp-server/pkg/core/config"
+	"github.com/futuretea/keycloak-mcp-server/pkg/core/version"
+	"github.com/futuretea/keycloak-mcp-server/pkg/toolset"
 )
 
 // Configuration holds server startup settings.
@@ -55,6 +55,7 @@ func NewServer(configuration Configuration) (*Server, error) {
 
 func (s *Server) registerTools() error {
 	filtered, err := toolcatalog.Build(s.configuration.Toolsets, toolset.FilterOptions{
+		ReadOnly:        s.configuration.ReadOnly,
 		EnabledTools:    s.configuration.EnabledTools,
 		DisabledTools:   s.configuration.DisabledTools,
 		EnabledDomains:  s.configuration.EnabledDomains,

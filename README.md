@@ -1,217 +1,134 @@
-# MCP Server Template
+# Keycloak MCP Server
 
 [中文文档](README.zh.md)
 
-Cloneable minimal MCP (Model Context Protocol) server skeleton with a dual-mode binary: **MCP server** for AI assistants and a small **CLI** for humans. Ships with example tools `echo` / `ping`.
+An MCP (Model Context Protocol) server for the complete Keycloak **26.6.4 Admin REST API**. It exposes 401 version-pinned operations as organized MCP tools and authenticates to Keycloak with a confidential-client service account.
 
-## Initialize a derived repository
-
-After creating a repository from this template, initialize its explicit
-placeholders before building:
-
-```bash
-./scripts/init-template.sh \
-  --module github.com/acme/my-mcp \
-  --binary my-mcp \
-  --npm-package @acme/my-mcp \
-  --image ghcr.io/acme/my-mcp
-```
-
-This creates the build workflow. Add `--with-release` only when the project is
-ready to publish; it also creates npm and Docker tag-release workflows. Add
-`--use-ghcr` with a `ghcr.io/...` image to publish to GitHub Container Registry
-using `GITHUB_TOKEN`, without Docker registry secrets. Other registries continue
-to require their credentials. Configure the npm registry before enabling a release.
-Use `--dry-run` to inspect the planned initialization without changing files.
+The primary transport is unauthenticated Streamable HTTP at `/mcp`. Keep it on a trusted network or place an authenticated reverse proxy in front of it.
 
 ## Quick start
 
+Build the binary with Go 1.25.10 or newer:
+
 ```bash
-# Requires Go 1.25+ (see .tool-versions)
 make build
-./bin/mcp-template-binary-placeholder version
 
-# Start MCP server (stdio, default)
-./bin/mcp-template-binary-placeholder mcp
+export MCP_KEYCLOAK_URL=http://127.0.0.1:8081
+export MCP_KEYCLOAK_REALM=master
+export MCP_KEYCLOAK_CLIENT_ID=keycloak-mcp
+export MCP_KEYCLOAK_CLIENT_SECRET='set-this-in-your-shell-or-secret-store'
 
-# List / call tools from the CLI (no MCP client required)
-./bin/mcp-template-binary-placeholder tools list
-./bin/mcp-template-binary-placeholder tools call echo --params '{"message":"hello"}'
-./bin/mcp-template-binary-placeholder tools call ping --params '{}'
+# Streamable HTTP, health check at /healthz
+./bin/keycloak mcp --port 8080 --listen 127.0.0.1
 ```
 
-## Features
-
-- **Subcommand CLI**: `mcp` starts the server; `tools` / `version` / `completion` are separate commands
-- **Multi-transport**: stdio, Streamable HTTP, and SSE
-- **Tool filtering**: `--enabled-tools`, `--disabled-tools`, `--enable-domains`, `--disable-domains`
-- **Engineering defaults**: Makefile, Dockerfile, GitHub Actions CI, golangci-lint config, MIT license
-
-## CLI commands
-
-| Command | Purpose |
-|---------|---------|
-| `mcp-template-binary-placeholder mcp` | Start the MCP server (stdio or HTTP) |
-| `mcp-template-binary-placeholder tools list` | List enabled tools |
-| `mcp-template-binary-placeholder tools describe <name>` | Show tool schema |
-| `mcp-template-binary-placeholder tools call <name>` | Invoke a tool with JSON params |
-| `mcp-template-binary-placeholder version` | Print build metadata |
-| `mcp-template-binary-placeholder completion <shell>` | Generate shell completion |
-
-### Tools examples
-
-```bash
-./bin/mcp-template-binary-placeholder tools list
-./bin/mcp-template-binary-placeholder tools list --json
-./bin/mcp-template-binary-placeholder tools describe echo
-./bin/mcp-template-binary-placeholder tools describe echo --json
-./bin/mcp-template-binary-placeholder tools call echo --params '{"message":"hello"}'
-echo '{"message":"hello"}' | ./bin/mcp-template-binary-placeholder tools call echo --params-file -
-./bin/mcp-template-binary-placeholder tools call ping --params '{}'
-```
-
-## MCP transports
-
-### Stdio (default)
-
-```bash
-./bin/mcp-template-binary-placeholder mcp
-```
-
-Cursor / Claude Desktop style config:
+Connect an MCP client without an MCP-side token:
 
 ```json
 {
   "mcpServers": {
-    "mcp-template-binary-placeholder": {
-      "command": "/absolute/path/to/bin/mcp-template-binary-placeholder",
-      "args": ["mcp"]
-    }
-  }
-}
-```
-
-### Streamable HTTP
-
-```bash
-./bin/mcp-template-binary-placeholder mcp --port 8080
-curl -s http://127.0.0.1:8080/healthz
-```
-
-Client config example:
-
-```json
-{
-  "mcpServers": {
-    "mcp-template-binary-placeholder": {
+    "keycloak": {
       "url": "http://127.0.0.1:8080/mcp"
     }
   }
 }
 ```
 
-### SSE
+For stdio, omit `--port` and configure the client to run `keycloak mcp` with the same Keycloak environment variables.
 
-Same process as HTTP mode. Endpoints:
+## Keycloak setup
+
+Create a confidential client in the selected realm, enable **Service Accounts**, and grant its service-account user the `realm-management` roles required by the tools you expose. A read-only user directory setup commonly starts with `query-users` and `view-users`.
+
+The MCP process sends the client credentials only to the configured Keycloak base URL. The realm in every realm-scoped tool path is always the configured realm and cannot be overridden by a caller. The two global `/admin/realms` operations are only available after explicit full-API opt-in.
+
+## Tools and safety
+
+The embedded Keycloak 26.6.4 OpenAPI document generates 401 tool definitions. Tool names use this predictable shape:
+
+```text
+keycloak_<domain>_<method>_<path>
+```
+
+Examples: `keycloak_users_get_users`, `keycloak_clients_get_clients`, and `keycloak_authorization_get_clients_by_client_uuid_authz_resource_server_resource`.
+
+Tools are grouped by the OpenAPI resource domain. Request path and query parameters are direct MCP inputs; the configured `realm` is deliberately omitted. JSON, form, text, XML, and YAML request bodies follow the operation's declared content type. JSON responses are formatted, textual responses are returned as text, and binary responses are returned losslessly as a Base64 JSON envelope.
+
+`read_only` defaults to `true`, so state-changing tools, the two confidential-client secret retrieval tools, and global realm operations are not registered. `enabled_tools` and `enable_domains` cannot bypass this setting. To expose the complete API, make a deliberate configuration change:
+
+```bash
+./bin/keycloak mcp --read-only=false --port 8080
+```
+
+Use least-privilege service-account roles even when writes are enabled.
+
+Inspect the current catalog without Keycloak credentials:
+
+```bash
+./bin/keycloak tools list
+./bin/keycloak tools describe keycloak_users_get_users --json
+```
+
+Calling a tool requires the Keycloak configuration above:
+
+```bash
+./bin/keycloak tools call keycloak_users_get_users --params '{"max": 10}'
+```
+
+## HTTP and Docker
+
+The HTTP process provides these endpoints:
 
 | Path | Purpose |
-|------|---------|
-| `/healthz` | Health check (`GET`/`HEAD`) |
-| `/mcp` | Streamable HTTP |
+|---|---|
+| `/healthz` | Health check (`GET` / `HEAD`) |
+| `/mcp` | Streamable HTTP MCP |
 | `/sse` | SSE connection |
-| `/message` | SSE message endpoint |
+| `/message` | SSE messages |
+
+All MCP HTTP and SSE endpoints have no built-in authentication or TLS. The default listener is loopback. For a non-loopback deployment, use a reverse proxy that provides TLS and your chosen access control.
 
 ```bash
-./bin/mcp-template-binary-placeholder mcp --port 8080 --sse-base-url http://127.0.0.1:8080
-```
-
-### Docker
-
-```bash
-# Build
 make docker
 
-# Stdio (default ENTRYPOINT is `mcp-template-binary-placeholder mcp`)
-docker run -i --rm mcp-template-image-placeholder:dev
-
-# HTTP
-docker run --rm -p 8080:8080 mcp-template-image-placeholder:dev --port 8080 --listen 0.0.0.0
+docker run --rm -p 8080:8080 \
+  -e MCP_KEYCLOAK_URL=http://host.docker.internal:8081 \
+  -e MCP_KEYCLOAK_REALM=master \
+  -e MCP_KEYCLOAK_CLIENT_ID=keycloak-mcp \
+  -e MCP_KEYCLOAK_CLIENT_SECRET \
+  ghcr.io/futuretea/keycloak-mcp-server:dev \
+  --port 8080 --listen 0.0.0.0
 ```
-
-HTTP / SSE have **no auth and no TLS**. Default `--listen 127.0.0.1`. Use only on trusted networks; put a reverse proxy in front if you expose the port.
 
 ## Configuration
 
-Priority: **flags > environment variables > config file > defaults**.
+Precedence is **flags > environment variables > YAML config > defaults**. See [config.example.yaml](config.example.yaml).
 
-### Environment variables
+| Key / environment variable | Default | Meaning |
+|---|---:|---|
+| `keycloak_url` / `MCP_KEYCLOAK_URL` | — | Absolute Keycloak base URL |
+| `keycloak_realm` / `MCP_KEYCLOAK_REALM` | — | Realm used for service-account authentication and all realm-scoped tools |
+| `keycloak_client_id` / `MCP_KEYCLOAK_CLIENT_ID` | — | Confidential client ID |
+| `keycloak_client_secret` / `MCP_KEYCLOAK_CLIENT_SECRET` | — | Confidential client secret; keep it out of config files and source control |
+| `read_only` / `MCP_READ_ONLY` | `true` | Hide state-changing, client-secret retrieval, and global realm tools |
+| `request_timeout_seconds` / `MCP_REQUEST_TIMEOUT_SECONDS` | `30` | Keycloak API request timeout |
+| `port` / `MCP_PORT` | `0` | HTTP port; `0` uses stdio |
+| `listen` / `MCP_LISTEN` | `127.0.0.1` | HTTP bind host |
+| `sse_base_url` / `MCP_SSE_BASE_URL` | empty | Public base URL for the SSE message endpoint |
+| `enabled_tools`, `disabled_tools` | empty | Tool-name filters |
+| `enabled_domains`, `disabled_domains` | empty | Resource-domain filters |
 
-| Variable | Description | Default |
-|----------|-------------|---------|
-| `MCP_LOG_LEVEL` | Log level | `info` |
-| `MCP_PORT` | HTTP port (`0` = stdio) | `0` |
-| `MCP_LISTEN` | HTTP listen host | `127.0.0.1` |
-| `MCP_SSE_BASE_URL` | Public SSE base URL | `""` |
-
-### Config file
-
-See `config.example.yaml`:
-
-```yaml
-port: 0
-listen: 127.0.0.1
-sse_base_url: ""
-log_level: info
-enabled_tools: []
-disabled_tools: []
-enabled_domains: []
-disabled_domains: []
-```
+## Verification and releases
 
 ```bash
-./bin/mcp-template-binary-placeholder mcp --config config.example.yaml --port 8080
+make test       # unit tests
+make e2e        # requires Docker; starts Keycloak 26.6.4 and exercises MCP HTTP
+make ci         # lint, unit tests, Docker E2E, template check, build
 ```
 
-## Project layout
+The build workflow and both NPM and Docker release validations run the Docker E2E suite before publication. Releases publish `@futuretea/keycloak-mcp-server` and `ghcr.io/futuretea/keycloak-mcp-server` from stable `vX.Y.Z` tags.
 
-```
-cmd/mcp-server/          # binary entrypoint
-internal/cmd/             # cobra CLI (mcp / tools / version / completion)
-pkg/core/                 # config / logging / version
-pkg/server/mcp/           # MCP registration and transports
-pkg/server/http/          # HTTP / SSE / healthz
-pkg/toolset/              # Toolset interface and filters
-pkg/toolset/example/      # sample tools (replace with your domain)
-.github/workflows/        # CI
-scripts/init-template.sh  # derived-project initializer
-templates/                # CI and release scaffolding copied by the initializer
-```
-
-## Extend with your own tools
-
-1. Add `pkg/toolset/<your-domain>/` implementing `toolset.Toolset`.
-2. Register it in `internal/cmd/root.go` via `defaultToolsets()`.
-3. Control exposure with `--enabled-tools` / `--enable-domains`.
-
-## Development
-
-```bash
-make tidy
-make format
-make lint
-make test
-make coverage
-make ci
-make build
-make docker
-```
-
-Generated build CI (`.github/workflows/build.yaml`) runs lint, tests, a multi-OS
-build with CLI smoke checks, and a Docker image build.
-
-## Local reference clones
-
-`third-party-projects/` can hold local reference checkouts. It is listed in `.gitignore` and is not part of the template deliverable.
+The API source and SHA-256 provenance are recorded in [internal/keycloakapi/spec/README.md](internal/keycloakapi/spec/README.md). A local Keycloak source checkout may live in ignored `third-party-projects/keycloak`.
 
 ## License
 

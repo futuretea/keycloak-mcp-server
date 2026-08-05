@@ -7,10 +7,10 @@ import (
 
 	"github.com/mark3labs/mcp-go/mcp"
 
-	"example.invalid/mcp-template-module-placeholder/pkg/core/config"
-	mcpserver "example.invalid/mcp-template-module-placeholder/pkg/server/mcp"
-	"example.invalid/mcp-template-module-placeholder/pkg/toolset"
-	"example.invalid/mcp-template-module-placeholder/pkg/toolset/example"
+	"github.com/futuretea/keycloak-mcp-server/pkg/core/config"
+	mcpserver "github.com/futuretea/keycloak-mcp-server/pkg/server/mcp"
+	"github.com/futuretea/keycloak-mcp-server/pkg/toolset"
+	"github.com/futuretea/keycloak-mcp-server/pkg/toolset/example"
 )
 
 func TestNewServerRegistersExampleTools(t *testing.T) {
@@ -56,6 +56,29 @@ func TestNewServerRejectsEmptyToolFilter(t *testing.T) {
 	})
 	if err == nil || !strings.Contains(err.Error(), "no tools registered") {
 		t.Fatalf("expected no tools registered error, got %v", err)
+	}
+}
+
+func TestNewServerReadOnlyOmitsWriteToolsEvenWhenExplicitlyEnabled(t *testing.T) {
+	server, err := mcpserver.NewServer(mcpserver.Configuration{
+		StaticConfig: &config.StaticConfig{
+			LogLevel:     "info",
+			ReadOnly:     true,
+			EnabledTools: []string{"read", "write"},
+		},
+		Toolsets: []toolset.Toolset{staticToolset{tools: []toolset.ServerTool{
+			{Tool: mcp.NewTool("read"), Handler: noOpHandler, Domain: "test"},
+			{Tool: mcp.NewTool("write"), Handler: noOpHandler, Domain: "test", IsWrite: true},
+			{Tool: mcp.NewTool("read-secret"), Handler: noOpHandler, Domain: "test", IsSensitive: true},
+			{Tool: mcp.NewTool("global-read"), Handler: noOpHandler, Domain: "test", IsGlobal: true},
+		}}},
+	})
+	if err != nil {
+		t.Fatalf("NewServer: %v", err)
+	}
+	defer server.Close()
+	if got := server.GetEnabledTools(); len(got) != 1 || got[0] != "read" {
+		t.Fatalf("read-only enabled tools = %v, want [read]", got)
 	}
 }
 
@@ -134,10 +157,12 @@ func (t staticToolset) GetTools() []toolset.ServerTool {
 
 func rawSchemaTool(schema string) toolset.ServerTool {
 	return toolset.ServerTool{
-		Tool: mcp.NewToolWithRawSchema("raw", "raw schema test tool", []byte(schema)),
-		Handler: func(context.Context, map[string]any) (string, error) {
-			return "", nil
-		},
-		Domain: "test",
+		Tool:    mcp.NewToolWithRawSchema("raw", "raw schema test tool", []byte(schema)),
+		Handler: noOpHandler,
+		Domain:  "test",
 	}
+}
+
+func noOpHandler(context.Context, map[string]any) (string, error) {
+	return "", nil
 }

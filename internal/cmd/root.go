@@ -1,17 +1,19 @@
 package cmd
 
 import (
+	"context"
 	"fmt"
 	"io"
 
 	"github.com/spf13/cobra"
 	"github.com/spf13/viper"
 
-	"example.invalid/mcp-template-module-placeholder/internal/toolcatalog"
-	"example.invalid/mcp-template-module-placeholder/pkg/core/config"
-	"example.invalid/mcp-template-module-placeholder/pkg/core/version"
-	"example.invalid/mcp-template-module-placeholder/pkg/toolset"
-	"example.invalid/mcp-template-module-placeholder/pkg/toolset/example"
+	"github.com/futuretea/keycloak-mcp-server/internal/keycloakclient"
+	"github.com/futuretea/keycloak-mcp-server/internal/toolcatalog"
+	"github.com/futuretea/keycloak-mcp-server/pkg/core/config"
+	"github.com/futuretea/keycloak-mcp-server/pkg/core/version"
+	"github.com/futuretea/keycloak-mcp-server/pkg/toolset"
+	keycloaktools "github.com/futuretea/keycloak-mcp-server/pkg/toolset/keycloak"
 )
 
 // IOStreams groups the streams used by the CLI.
@@ -28,7 +30,7 @@ func NewRootCommand(streams IOStreams) *cobra.Command {
 
 	command := &cobra.Command{
 		Use:           version.BinaryName,
-		Short:         "MCP server template CLI and Model Context Protocol server",
+		Short:         "Keycloak 26.6.4 Admin REST MCP server and CLI",
 		SilenceUsage:  true,
 		SilenceErrors: true,
 	}
@@ -48,6 +50,12 @@ func NewRootCommand(streams IOStreams) *cobra.Command {
 func addCommonFlags(command *cobra.Command, cfgFile *string) {
 	flags := command.PersistentFlags()
 	flags.StringVar(cfgFile, "config", "", "config file path (YAML)")
+	flags.String("keycloak-url", "", "Keycloak base URL (also MCP_KEYCLOAK_URL)")
+	flags.String("keycloak-realm", "", "Keycloak realm for service-account authentication (also MCP_KEYCLOAK_REALM)")
+	flags.String("keycloak-client-id", "", "Keycloak service-account client ID (also MCP_KEYCLOAK_CLIENT_ID)")
+	flags.String("keycloak-client-secret", "", "Keycloak service-account client secret (also MCP_KEYCLOAK_CLIENT_SECRET)")
+	flags.Bool("read-only", true, "hide all state-changing Keycloak tools")
+	flags.Int("request-timeout-seconds", 30, "Keycloak API request timeout in seconds")
 	flags.StringSlice("enabled-tools", []string{}, "comma-separated list of tool names to enable")
 	flags.StringSlice("disabled-tools", []string{}, "comma-separated list of tool names to disable")
 	flags.StringSlice("enable-domains", []string{}, "comma-separated list of tool domains to enable")
@@ -57,10 +65,16 @@ func addCommonFlags(command *cobra.Command, cfgFile *string) {
 func bindCommonFlags(v *viper.Viper, cmd *cobra.Command) error {
 	flags := cmd.Root().PersistentFlags()
 	bindings := map[string]string{
-		"enabled_tools":    "enabled-tools",
-		"disabled_tools":   "disabled-tools",
-		"enabled_domains":  "enable-domains",
-		"disabled_domains": "disable-domains",
+		"keycloak_url":            "keycloak-url",
+		"keycloak_realm":          "keycloak-realm",
+		"keycloak_client_id":      "keycloak-client-id",
+		"keycloak_client_secret":  "keycloak-client-secret",
+		"read_only":               "read-only",
+		"request_timeout_seconds": "request-timeout-seconds",
+		"enabled_tools":           "enabled-tools",
+		"disabled_tools":          "disabled-tools",
+		"enabled_domains":         "enable-domains",
+		"disabled_domains":        "disable-domains",
 	}
 	for key, flag := range bindings {
 		if err := v.BindPFlag(key, flags.Lookup(flag)); err != nil {
@@ -81,17 +95,38 @@ func loadCLIConfig(cmd *cobra.Command, cfgFile string, v *viper.Viper) (*config.
 	return cfg, nil
 }
 
-func defaultToolsets() []toolset.Toolset {
-	return []toolset.Toolset{&example.Toolset{}}
+func defaultToolsets(executor keycloaktools.Executor) ([]toolset.Toolset, error) {
+	keycloakToolset, err := keycloaktools.New(executor)
+	if err != nil {
+		return nil, fmt.Errorf("create Keycloak toolset: %w", err)
+	}
+	return []toolset.Toolset{keycloakToolset}, nil
 }
 
 func buildToolCatalog(cfg *config.StaticConfig) ([]toolset.ServerTool, error) {
-	return toolcatalog.Build(defaultToolsets(), toolset.FilterOptions{
+	toolsets, err := defaultToolsets(lazyKeycloakExecutor{staticConfig: cfg})
+	if err != nil {
+		return nil, err
+	}
+	return toolcatalog.Build(toolsets, toolset.FilterOptions{
+		ReadOnly:        cfg.ReadOnly,
 		EnabledTools:    cfg.EnabledTools,
 		DisabledTools:   cfg.DisabledTools,
 		EnabledDomains:  cfg.EnabledDomains,
 		DisabledDomains: cfg.DisabledDomains,
 	})
+}
+
+type lazyKeycloakExecutor struct {
+	staticConfig *config.StaticConfig
+}
+
+func (e lazyKeycloakExecutor) Execute(ctx context.Context, request keycloakclient.Request) (string, error) {
+	client, err := keycloakclient.New(e.staticConfig, nil)
+	if err != nil {
+		return "", fmt.Errorf("configure Keycloak before calling tools: %w", err)
+	}
+	return client.Execute(ctx, request)
 }
 
 func newVersionCommand(streams IOStreams) *cobra.Command {

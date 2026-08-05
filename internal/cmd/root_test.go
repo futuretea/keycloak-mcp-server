@@ -7,7 +7,7 @@ import (
 	"strings"
 	"testing"
 
-	"example.invalid/mcp-template-module-placeholder/internal/cmd"
+	"github.com/futuretea/keycloak-mcp-server/internal/cmd"
 )
 
 func TestRootHelpListsSubcommands(t *testing.T) {
@@ -41,25 +41,44 @@ func TestRootWithoutArgsShowsHelp(t *testing.T) {
 	}
 }
 
-func TestToolsListAndCall(t *testing.T) {
+func TestToolsListAndDescribeWithoutCredentials(t *testing.T) {
 	var out bytes.Buffer
 	root := cmd.NewRootCommand(cmd.IOStreams{Out: &out, ErrOut: &out})
 	root.SetArgs([]string{"tools", "list"})
 	if err := root.Execute(); err != nil {
 		t.Fatalf("tools list: %v", err)
 	}
-	if !strings.Contains(out.String(), "echo") || !strings.Contains(out.String(), "ping") {
-		t.Fatalf("tools list missing echo/ping:\n%s", out.String())
+	if !strings.Contains(out.String(), "keycloak_users_get_users") {
+		t.Fatalf("tools list missing Keycloak users tool:\n%s", out.String())
+	}
+	if strings.Contains(out.String(), "keycloak_users_post_users") {
+		t.Fatalf("read-only tool list exposes write tool:\n%s", out.String())
+	}
+	if strings.Contains(out.String(), "keycloak_clients_get_clients_by_client_uuid_client_secret") {
+		t.Fatalf("read-only tool list exposes a client-secret tool:\n%s", out.String())
+	}
+	if strings.Contains(out.String(), "keycloak_realms_admin_get_realms") {
+		t.Fatalf("read-only tool list exposes a global realm tool:\n%s", out.String())
 	}
 
 	out.Reset()
 	root = cmd.NewRootCommand(cmd.IOStreams{Out: &out, ErrOut: &out})
-	root.SetArgs([]string{"tools", "call", "echo", "--params", `{"message":"hi"}`})
+	root.SetArgs([]string{"tools", "describe", "keycloak_users_get_users", "--json"})
 	if err := root.Execute(); err != nil {
-		t.Fatalf("tools call: %v", err)
+		t.Fatalf("tools describe: %v", err)
 	}
-	if strings.TrimSpace(out.String()) != "hi" {
-		t.Fatalf("echo result = %q", out.String())
+	if !strings.Contains(out.String(), "briefRepresentation") {
+		t.Fatalf("tool description missing direct Keycloak parameter: %s", out.String())
+	}
+}
+
+func TestToolsCallRequiresKeycloakConfiguration(t *testing.T) {
+	var out bytes.Buffer
+	root := cmd.NewRootCommand(cmd.IOStreams{Out: &out, ErrOut: &out})
+	root.SetArgs([]string{"tools", "call", "keycloak_users_get_users", "--params", "{}"})
+	err := root.Execute()
+	if err == nil || !strings.Contains(err.Error(), "keycloak_url is required") {
+		t.Fatalf("tools call error = %v, want Keycloak configuration guidance", err)
 	}
 }
 
@@ -70,7 +89,7 @@ func TestVersionCommand(t *testing.T) {
 	if err := root.Execute(); err != nil {
 		t.Fatalf("version: %v", err)
 	}
-	if !strings.Contains(out.String(), "mcp-template-binary-placeholder") {
+	if !strings.Contains(out.String(), "keycloak") {
 		t.Fatalf("unexpected version output: %q", out.String())
 	}
 }
@@ -95,7 +114,7 @@ func TestToolsUnknownTool(t *testing.T) {
 func TestToolsRejectsNullParams(t *testing.T) {
 	var out bytes.Buffer
 	root := cmd.NewRootCommand(cmd.IOStreams{Out: &out, ErrOut: &out})
-	root.SetArgs([]string{"tools", "call", "ping", "--params", "null"})
+	root.SetArgs([]string{"tools", "call", "keycloak_users_get_users", "--params", "null"})
 	err := root.Execute()
 	if err == nil || !strings.Contains(err.Error(), "expected an object") {
 		t.Fatalf("expected JSON object error, got %v", err)
@@ -112,8 +131,7 @@ func TestCommandsReturnOutputErrors(t *testing.T) {
 		{name: "completion install", args: []string{"completion", "install"}},
 		{name: "version", args: []string{"version"}},
 		{name: "tools list", args: []string{"tools", "list"}},
-		{name: "tools describe", args: []string{"tools", "describe", "echo"}},
-		{name: "tools call", args: []string{"tools", "call", "echo", "--params", `{"message":"hi"}`}},
+		{name: "tools describe", args: []string{"tools", "describe", "keycloak_users_get_users"}},
 	}
 
 	for _, tt := range tests {

@@ -1,0 +1,401 @@
+/admin/realms	get		Realms Admin
+/admin/realms	post		Realms Admin
+/admin/realms/{realm}	get		Realms Admin
+/admin/realms/{realm}	put		Realms Admin
+/admin/realms/{realm}	delete		Realms Admin
+/admin/realms/{realm}/admin-events	get		Realms Admin
+/admin/realms/{realm}/admin-events	delete		Realms Admin
+/admin/realms/{realm}/attack-detection/brute-force/users	delete		Attack Detection
+/admin/realms/{realm}/attack-detection/brute-force/users/{userId}	get		Attack Detection
+/admin/realms/{realm}/attack-detection/brute-force/users/{userId}	delete		Attack Detection
+/admin/realms/{realm}/authentication/authenticator-providers	get		Authentication Management
+/admin/realms/{realm}/authentication/client-authenticator-providers	get		Authentication Management
+/admin/realms/{realm}/authentication/config	post		Authentication Management
+/admin/realms/{realm}/authentication/config-description/{providerId}	get		Authentication Management
+/admin/realms/{realm}/authentication/config/{id}	get		Authentication Management
+/admin/realms/{realm}/authentication/config/{id}	put		Authentication Management
+/admin/realms/{realm}/authentication/config/{id}	delete		Authentication Management
+/admin/realms/{realm}/authentication/executions	post		Authentication Management
+/admin/realms/{realm}/authentication/executions/{executionId}	get		Authentication Management
+/admin/realms/{realm}/authentication/executions/{executionId}	delete		Authentication Management
+/admin/realms/{realm}/authentication/executions/{executionId}/config	post		Authentication Management
+/admin/realms/{realm}/authentication/executions/{executionId}/config/{id}	get		Authentication Management
+/admin/realms/{realm}/authentication/executions/{executionId}/lower-priority	post		Authentication Management
+/admin/realms/{realm}/authentication/executions/{executionId}/raise-priority	post		Authentication Management
+/admin/realms/{realm}/authentication/flows	get		Authentication Management
+/admin/realms/{realm}/authentication/flows	post		Authentication Management
+/admin/realms/{realm}/authentication/flows/{flowAlias}/copy	post		Authentication Management
+/admin/realms/{realm}/authentication/flows/{flowAlias}/executions	get		Authentication Management
+/admin/realms/{realm}/authentication/flows/{flowAlias}/executions	put		Authentication Management
+/admin/realms/{realm}/authentication/flows/{flowAlias}/executions/execution	post		Authentication Management
+/admin/realms/{realm}/authentication/flows/{flowAlias}/executions/flow	post		Authentication Management
+/admin/realms/{realm}/authentication/flows/{id}	get		Authentication Management
+/admin/realms/{realm}/authentication/flows/{id}	put		Authentication Management
+/admin/realms/{realm}/authentication/flows/{id}	delete		Authentication Management
+/admin/realms/{realm}/authentication/form-action-providers	get		Authentication Management
+/admin/realms/{realm}/authentication/form-providers	get		Authentication Management
+/admin/realms/{realm}/authentication/per-client-config-description	get		Authentication Management
+/admin/realms/{realm}/authentication/register-required-action	post		Authentication Management
+/admin/realms/{realm}/authentication/required-actions	get		Authentication Management
+/admin/realms/{realm}/authentication/required-actions/{alias}	get		Authentication Management
+/admin/realms/{realm}/authentication/required-actions/{alias}	put		Authentication Management
+/admin/realms/{realm}/authentication/required-actions/{alias}	delete		Authentication Management
+/admin/realms/{realm}/authentication/required-actions/{alias}/config	get		Authentication Management
+/admin/realms/{realm}/authentication/required-actions/{alias}/config	put		Authentication Management
+/admin/realms/{realm}/authentication/required-actions/{alias}/config	delete		Authentication Management
+/admin/realms/{realm}/authentication/required-actions/{alias}/config-description	get		Authentication Management
+/admin/realms/{realm}/authentication/required-actions/{alias}/lower-priority	post		Authentication Management
+/admin/realms/{realm}/authentication/required-actions/{alias}/raise-priority	post		Authentication Management
+/admin/realms/{realm}/authentication/unregistered-required-actions	get		Authentication Management
+/admin/realms/{realm}/client-description-converter	post		Realms Admin
+/admin/realms/{realm}/client-policies/policies	get		Realms Admin
+/admin/realms/{realm}/client-policies/policies	put		Realms Admin
+/admin/realms/{realm}/client-policies/profiles	get		Realms Admin
+/admin/realms/{realm}/client-policies/profiles	put		Realms Admin
+/admin/realms/{realm}/client-registration-policy/providers	get		Client Registration Policy
+/admin/realms/{realm}/client-scopes	get		Client Scopes
+/admin/realms/{realm}/client-scopes	post		Client Scopes
+/admin/realms/{realm}/client-scopes/{client-scope-id}	get		Client Scopes
+/admin/realms/{realm}/client-scopes/{client-scope-id}	put		Client Scopes
+/admin/realms/{realm}/client-scopes/{client-scope-id}	delete		Client Scopes
+/admin/realms/{realm}/client-scopes/{client-scope-id}/protocol-mappers/add-models	post		Protocol Mappers
+/admin/realms/{realm}/client-scopes/{client-scope-id}/protocol-mappers/models	get		Protocol Mappers
+/admin/realms/{realm}/client-scopes/{client-scope-id}/protocol-mappers/models	post		Protocol Mappers
+/admin/realms/{realm}/client-scopes/{client-scope-id}/protocol-mappers/models/{id}	get		Protocol Mappers
+/admin/realms/{realm}/client-scopes/{client-scope-id}/protocol-mappers/models/{id}	put		Protocol Mappers
+/admin/realms/{realm}/client-scopes/{client-scope-id}/protocol-mappers/models/{id}	delete		Protocol Mappers
+/admin/realms/{realm}/client-scopes/{client-scope-id}/protocol-mappers/protocol/{protocol}	get		Protocol Mappers
+/admin/realms/{realm}/client-scopes/{client-scope-id}/scope-mappings	get		Scope Mappings
+/admin/realms/{realm}/client-scopes/{client-scope-id}/scope-mappings/clients/{client}	get		Scope Mappings
+/admin/realms/{realm}/client-scopes/{client-scope-id}/scope-mappings/clients/{client}	post		Scope Mappings
+/admin/realms/{realm}/client-scopes/{client-scope-id}/scope-mappings/clients/{client}	delete		Scope Mappings
+/admin/realms/{realm}/client-scopes/{client-scope-id}/scope-mappings/clients/{client}/available	get		Scope Mappings
+/admin/realms/{realm}/client-scopes/{client-scope-id}/scope-mappings/clients/{client}/composite	get		Scope Mappings
+/admin/realms/{realm}/client-scopes/{client-scope-id}/scope-mappings/realm	get		Scope Mappings
+/admin/realms/{realm}/client-scopes/{client-scope-id}/scope-mappings/realm	post		Scope Mappings
+/admin/realms/{realm}/client-scopes/{client-scope-id}/scope-mappings/realm	delete		Scope Mappings
+/admin/realms/{realm}/client-scopes/{client-scope-id}/scope-mappings/realm/available	get		Scope Mappings
+/admin/realms/{realm}/client-scopes/{client-scope-id}/scope-mappings/realm/composite	get		Scope Mappings
+/admin/realms/{realm}/client-session-stats	get		Realms Admin
+/admin/realms/{realm}/client-templates	get		Client Scopes
+/admin/realms/{realm}/client-templates	post		Client Scopes
+/admin/realms/{realm}/client-templates/{client-scope-id}	get		Client Scopes
+/admin/realms/{realm}/client-templates/{client-scope-id}	put		Client Scopes
+/admin/realms/{realm}/client-templates/{client-scope-id}	delete		Client Scopes
+/admin/realms/{realm}/client-templates/{client-scope-id}/protocol-mappers/add-models	post		Protocol Mappers
+/admin/realms/{realm}/client-templates/{client-scope-id}/protocol-mappers/models	get		Protocol Mappers
+/admin/realms/{realm}/client-templates/{client-scope-id}/protocol-mappers/models	post		Protocol Mappers
+/admin/realms/{realm}/client-templates/{client-scope-id}/protocol-mappers/models/{id}	get		Protocol Mappers
+/admin/realms/{realm}/client-templates/{client-scope-id}/protocol-mappers/models/{id}	put		Protocol Mappers
+/admin/realms/{realm}/client-templates/{client-scope-id}/protocol-mappers/models/{id}	delete		Protocol Mappers
+/admin/realms/{realm}/client-templates/{client-scope-id}/protocol-mappers/protocol/{protocol}	get		Protocol Mappers
+/admin/realms/{realm}/client-templates/{client-scope-id}/scope-mappings	get		Scope Mappings
+/admin/realms/{realm}/client-templates/{client-scope-id}/scope-mappings/clients/{client}	get		Scope Mappings
+/admin/realms/{realm}/client-templates/{client-scope-id}/scope-mappings/clients/{client}	post		Scope Mappings
+/admin/realms/{realm}/client-templates/{client-scope-id}/scope-mappings/clients/{client}	delete		Scope Mappings
+/admin/realms/{realm}/client-templates/{client-scope-id}/scope-mappings/clients/{client}/available	get		Scope Mappings
+/admin/realms/{realm}/client-templates/{client-scope-id}/scope-mappings/clients/{client}/composite	get		Scope Mappings
+/admin/realms/{realm}/client-templates/{client-scope-id}/scope-mappings/realm	get		Scope Mappings
+/admin/realms/{realm}/client-templates/{client-scope-id}/scope-mappings/realm	post		Scope Mappings
+/admin/realms/{realm}/client-templates/{client-scope-id}/scope-mappings/realm	delete		Scope Mappings
+/admin/realms/{realm}/client-templates/{client-scope-id}/scope-mappings/realm/available	get		Scope Mappings
+/admin/realms/{realm}/client-templates/{client-scope-id}/scope-mappings/realm/composite	get		Scope Mappings
+/admin/realms/{realm}/client-types	get		Realms Admin
+/admin/realms/{realm}/client-types	put		Realms Admin
+/admin/realms/{realm}/clients	get		Clients
+/admin/realms/{realm}/clients	post		Clients
+/admin/realms/{realm}/clients-initial-access	get		Client Initial Access
+/admin/realms/{realm}/clients-initial-access	post		Client Initial Access
+/admin/realms/{realm}/clients-initial-access/{id}	delete		Client Initial Access
+/admin/realms/{realm}/clients/{client-uuid}	get		Clients
+/admin/realms/{realm}/clients/{client-uuid}	put		Clients
+/admin/realms/{realm}/clients/{client-uuid}	delete		Clients
+/admin/realms/{realm}/clients/{client-uuid}/authz/resource-server	get		untagged
+/admin/realms/{realm}/clients/{client-uuid}/authz/resource-server	put		untagged
+/admin/realms/{realm}/clients/{client-uuid}/authz/resource-server/import	post		untagged
+/admin/realms/{realm}/clients/{client-uuid}/authz/resource-server/permission	get		untagged
+/admin/realms/{realm}/clients/{client-uuid}/authz/resource-server/permission	post		untagged
+/admin/realms/{realm}/clients/{client-uuid}/authz/resource-server/permission/evaluate	post		untagged
+/admin/realms/{realm}/clients/{client-uuid}/authz/resource-server/permission/providers	get		untagged
+/admin/realms/{realm}/clients/{client-uuid}/authz/resource-server/permission/search	get		untagged
+/admin/realms/{realm}/clients/{client-uuid}/authz/resource-server/policy	get		untagged
+/admin/realms/{realm}/clients/{client-uuid}/authz/resource-server/policy	post		untagged
+/admin/realms/{realm}/clients/{client-uuid}/authz/resource-server/policy/evaluate	post		untagged
+/admin/realms/{realm}/clients/{client-uuid}/authz/resource-server/policy/providers	get		untagged
+/admin/realms/{realm}/clients/{client-uuid}/authz/resource-server/policy/search	get		untagged
+/admin/realms/{realm}/clients/{client-uuid}/authz/resource-server/resource	get		untagged
+/admin/realms/{realm}/clients/{client-uuid}/authz/resource-server/resource	post		untagged
+/admin/realms/{realm}/clients/{client-uuid}/authz/resource-server/resource/search	get		untagged
+/admin/realms/{realm}/clients/{client-uuid}/authz/resource-server/resource/{resource-id}	get		untagged
+/admin/realms/{realm}/clients/{client-uuid}/authz/resource-server/resource/{resource-id}	put		untagged
+/admin/realms/{realm}/clients/{client-uuid}/authz/resource-server/resource/{resource-id}	delete		untagged
+/admin/realms/{realm}/clients/{client-uuid}/authz/resource-server/resource/{resource-id}/attributes	get		untagged
+/admin/realms/{realm}/clients/{client-uuid}/authz/resource-server/resource/{resource-id}/permissions	get		untagged
+/admin/realms/{realm}/clients/{client-uuid}/authz/resource-server/resource/{resource-id}/scopes	get		untagged
+/admin/realms/{realm}/clients/{client-uuid}/authz/resource-server/scope	get		untagged
+/admin/realms/{realm}/clients/{client-uuid}/authz/resource-server/scope	post		untagged
+/admin/realms/{realm}/clients/{client-uuid}/authz/resource-server/scope/search	get		untagged
+/admin/realms/{realm}/clients/{client-uuid}/authz/resource-server/scope/{scope-id}	get		untagged
+/admin/realms/{realm}/clients/{client-uuid}/authz/resource-server/scope/{scope-id}	put		untagged
+/admin/realms/{realm}/clients/{client-uuid}/authz/resource-server/scope/{scope-id}	delete		untagged
+/admin/realms/{realm}/clients/{client-uuid}/authz/resource-server/scope/{scope-id}/permissions	get		untagged
+/admin/realms/{realm}/clients/{client-uuid}/authz/resource-server/scope/{scope-id}/resources	get		untagged
+/admin/realms/{realm}/clients/{client-uuid}/authz/resource-server/settings	get		untagged
+/admin/realms/{realm}/clients/{client-uuid}/certificates/{attr}	get		Client Attribute Certificate
+/admin/realms/{realm}/clients/{client-uuid}/certificates/{attr}/download	post		Client Attribute Certificate
+/admin/realms/{realm}/clients/{client-uuid}/certificates/{attr}/generate	post		Client Attribute Certificate
+/admin/realms/{realm}/clients/{client-uuid}/certificates/{attr}/generate-and-download	post		Client Attribute Certificate
+/admin/realms/{realm}/clients/{client-uuid}/certificates/{attr}/upload	post		Client Attribute Certificate
+/admin/realms/{realm}/clients/{client-uuid}/certificates/{attr}/upload-certificate	post		Client Attribute Certificate
+/admin/realms/{realm}/clients/{client-uuid}/client-secret	get		Clients
+/admin/realms/{realm}/clients/{client-uuid}/client-secret	post		Clients
+/admin/realms/{realm}/clients/{client-uuid}/client-secret/rotated	get		Clients
+/admin/realms/{realm}/clients/{client-uuid}/client-secret/rotated	delete		Clients
+/admin/realms/{realm}/clients/{client-uuid}/default-client-scopes	get		Clients
+/admin/realms/{realm}/clients/{client-uuid}/default-client-scopes/{clientScopeId}	put		Clients
+/admin/realms/{realm}/clients/{client-uuid}/default-client-scopes/{clientScopeId}	delete		Clients
+/admin/realms/{realm}/clients/{client-uuid}/evaluate-scopes/generate-example-access-token	get		Clients
+/admin/realms/{realm}/clients/{client-uuid}/evaluate-scopes/generate-example-id-token	get		Clients
+/admin/realms/{realm}/clients/{client-uuid}/evaluate-scopes/generate-example-userinfo	get		Clients
+/admin/realms/{realm}/clients/{client-uuid}/evaluate-scopes/protocol-mappers	get		Clients
+/admin/realms/{realm}/clients/{client-uuid}/evaluate-scopes/scope-mappings/{roleContainerId}/granted	get		Clients
+/admin/realms/{realm}/clients/{client-uuid}/evaluate-scopes/scope-mappings/{roleContainerId}/not-granted	get		Clients
+/admin/realms/{realm}/clients/{client-uuid}/installation/providers/{providerId}	get		Clients
+/admin/realms/{realm}/clients/{client-uuid}/management/permissions	get		Clients
+/admin/realms/{realm}/clients/{client-uuid}/management/permissions	put		Clients
+/admin/realms/{realm}/clients/{client-uuid}/nodes	post		Clients
+/admin/realms/{realm}/clients/{client-uuid}/nodes/{node}	delete		Clients
+/admin/realms/{realm}/clients/{client-uuid}/offline-session-count	get		Clients
+/admin/realms/{realm}/clients/{client-uuid}/offline-sessions	get		Clients
+/admin/realms/{realm}/clients/{client-uuid}/optional-client-scopes	get		Clients
+/admin/realms/{realm}/clients/{client-uuid}/optional-client-scopes/{clientScopeId}	put		Clients
+/admin/realms/{realm}/clients/{client-uuid}/optional-client-scopes/{clientScopeId}	delete		Clients
+/admin/realms/{realm}/clients/{client-uuid}/protocol-mappers/add-models	post		Protocol Mappers
+/admin/realms/{realm}/clients/{client-uuid}/protocol-mappers/models	get		Protocol Mappers
+/admin/realms/{realm}/clients/{client-uuid}/protocol-mappers/models	post		Protocol Mappers
+/admin/realms/{realm}/clients/{client-uuid}/protocol-mappers/models/{id}	get		Protocol Mappers
+/admin/realms/{realm}/clients/{client-uuid}/protocol-mappers/models/{id}	put		Protocol Mappers
+/admin/realms/{realm}/clients/{client-uuid}/protocol-mappers/models/{id}	delete		Protocol Mappers
+/admin/realms/{realm}/clients/{client-uuid}/protocol-mappers/protocol/{protocol}	get		Protocol Mappers
+/admin/realms/{realm}/clients/{client-uuid}/push-revocation	post		Clients
+/admin/realms/{realm}/clients/{client-uuid}/registration-access-token	post		Clients
+/admin/realms/{realm}/clients/{client-uuid}/roles	get		Roles
+/admin/realms/{realm}/clients/{client-uuid}/roles	post		Roles
+/admin/realms/{realm}/clients/{client-uuid}/roles/{role-name}	get		Roles
+/admin/realms/{realm}/clients/{client-uuid}/roles/{role-name}	put		Roles
+/admin/realms/{realm}/clients/{client-uuid}/roles/{role-name}	delete		Roles
+/admin/realms/{realm}/clients/{client-uuid}/roles/{role-name}/composites	get		Roles
+/admin/realms/{realm}/clients/{client-uuid}/roles/{role-name}/composites	post		Roles
+/admin/realms/{realm}/clients/{client-uuid}/roles/{role-name}/composites	delete		Roles
+/admin/realms/{realm}/clients/{client-uuid}/roles/{role-name}/composites/clients/{targetClientUuid}	get		Roles
+/admin/realms/{realm}/clients/{client-uuid}/roles/{role-name}/composites/realm	get		Roles
+/admin/realms/{realm}/clients/{client-uuid}/roles/{role-name}/groups	get		Roles
+/admin/realms/{realm}/clients/{client-uuid}/roles/{role-name}/management/permissions	get		Roles
+/admin/realms/{realm}/clients/{client-uuid}/roles/{role-name}/management/permissions	put		Roles
+/admin/realms/{realm}/clients/{client-uuid}/roles/{role-name}/users	get		Roles
+/admin/realms/{realm}/clients/{client-uuid}/scope-mappings	get		Scope Mappings
+/admin/realms/{realm}/clients/{client-uuid}/scope-mappings/clients/{client}	get		Scope Mappings
+/admin/realms/{realm}/clients/{client-uuid}/scope-mappings/clients/{client}	post		Scope Mappings
+/admin/realms/{realm}/clients/{client-uuid}/scope-mappings/clients/{client}	delete		Scope Mappings
+/admin/realms/{realm}/clients/{client-uuid}/scope-mappings/clients/{client}/available	get		Scope Mappings
+/admin/realms/{realm}/clients/{client-uuid}/scope-mappings/clients/{client}/composite	get		Scope Mappings
+/admin/realms/{realm}/clients/{client-uuid}/scope-mappings/realm	get		Scope Mappings
+/admin/realms/{realm}/clients/{client-uuid}/scope-mappings/realm	post		Scope Mappings
+/admin/realms/{realm}/clients/{client-uuid}/scope-mappings/realm	delete		Scope Mappings
+/admin/realms/{realm}/clients/{client-uuid}/scope-mappings/realm/available	get		Scope Mappings
+/admin/realms/{realm}/clients/{client-uuid}/scope-mappings/realm/composite	get		Scope Mappings
+/admin/realms/{realm}/clients/{client-uuid}/service-account-user	get		Clients
+/admin/realms/{realm}/clients/{client-uuid}/session-count	get		Clients
+/admin/realms/{realm}/clients/{client-uuid}/test-nodes-available	get		Clients
+/admin/realms/{realm}/clients/{client-uuid}/user-sessions	get		Clients
+/admin/realms/{realm}/components	get		Component
+/admin/realms/{realm}/components	post		Component
+/admin/realms/{realm}/components/{id}	get		Component
+/admin/realms/{realm}/components/{id}	put		Component
+/admin/realms/{realm}/components/{id}	delete		Component
+/admin/realms/{realm}/components/{id}/sub-component-types	get		Component
+/admin/realms/{realm}/credential-registrators	get		Realms Admin
+/admin/realms/{realm}/default-default-client-scopes	get		Realms Admin
+/admin/realms/{realm}/default-default-client-scopes/{clientScopeId}	put		Realms Admin
+/admin/realms/{realm}/default-default-client-scopes/{clientScopeId}	delete		Realms Admin
+/admin/realms/{realm}/default-groups	get		Realms Admin
+/admin/realms/{realm}/default-groups/{groupId}	put		Realms Admin
+/admin/realms/{realm}/default-groups/{groupId}	delete		Realms Admin
+/admin/realms/{realm}/default-optional-client-scopes	get		Realms Admin
+/admin/realms/{realm}/default-optional-client-scopes/{clientScopeId}	put		Realms Admin
+/admin/realms/{realm}/default-optional-client-scopes/{clientScopeId}	delete		Realms Admin
+/admin/realms/{realm}/events	get		Realms Admin
+/admin/realms/{realm}/events	delete		Realms Admin
+/admin/realms/{realm}/events/config	get		Realms Admin
+/admin/realms/{realm}/events/config	put		Realms Admin
+/admin/realms/{realm}/group-by-path/{path}	get		Realms Admin
+/admin/realms/{realm}/groups	get		Groups
+/admin/realms/{realm}/groups	post		Groups
+/admin/realms/{realm}/groups/count	get		Groups
+/admin/realms/{realm}/groups/{group-id}	get		Groups
+/admin/realms/{realm}/groups/{group-id}	put		Groups
+/admin/realms/{realm}/groups/{group-id}	delete		Groups
+/admin/realms/{realm}/groups/{group-id}/children	get		Groups
+/admin/realms/{realm}/groups/{group-id}/children	post		Groups
+/admin/realms/{realm}/groups/{group-id}/management/permissions	get		Groups
+/admin/realms/{realm}/groups/{group-id}/management/permissions	put		Groups
+/admin/realms/{realm}/groups/{group-id}/members	get		Groups
+/admin/realms/{realm}/groups/{group-id}/role-mappings	get		Role Mapper
+/admin/realms/{realm}/groups/{group-id}/role-mappings/clients/{client-id}	get		Client Role Mappings
+/admin/realms/{realm}/groups/{group-id}/role-mappings/clients/{client-id}	post		Client Role Mappings
+/admin/realms/{realm}/groups/{group-id}/role-mappings/clients/{client-id}	delete		Client Role Mappings
+/admin/realms/{realm}/groups/{group-id}/role-mappings/clients/{client-id}/available	get		Client Role Mappings
+/admin/realms/{realm}/groups/{group-id}/role-mappings/clients/{client-id}/composite	get		Client Role Mappings
+/admin/realms/{realm}/groups/{group-id}/role-mappings/realm	get		Role Mapper
+/admin/realms/{realm}/groups/{group-id}/role-mappings/realm	post		Role Mapper
+/admin/realms/{realm}/groups/{group-id}/role-mappings/realm	delete		Role Mapper
+/admin/realms/{realm}/groups/{group-id}/role-mappings/realm/available	get		Role Mapper
+/admin/realms/{realm}/groups/{group-id}/role-mappings/realm/composite	get		Role Mapper
+/admin/realms/{realm}/identity-provider/import-config	post		Identity Providers
+/admin/realms/{realm}/identity-provider/instances	get		Identity Providers
+/admin/realms/{realm}/identity-provider/instances	post		Identity Providers
+/admin/realms/{realm}/identity-provider/instances/{alias}	get		Identity Providers
+/admin/realms/{realm}/identity-provider/instances/{alias}	put		Identity Providers
+/admin/realms/{realm}/identity-provider/instances/{alias}	delete		Identity Providers
+/admin/realms/{realm}/identity-provider/instances/{alias}/export	get		Identity Providers
+/admin/realms/{realm}/identity-provider/instances/{alias}/management/permissions	get		Identity Providers
+/admin/realms/{realm}/identity-provider/instances/{alias}/management/permissions	put		Identity Providers
+/admin/realms/{realm}/identity-provider/instances/{alias}/mapper-types	get		Identity Providers
+/admin/realms/{realm}/identity-provider/instances/{alias}/mappers	get		Identity Providers
+/admin/realms/{realm}/identity-provider/instances/{alias}/mappers	post		Identity Providers
+/admin/realms/{realm}/identity-provider/instances/{alias}/mappers/{id}	get		Identity Providers
+/admin/realms/{realm}/identity-provider/instances/{alias}/mappers/{id}	put		Identity Providers
+/admin/realms/{realm}/identity-provider/instances/{alias}/mappers/{id}	delete		Identity Providers
+/admin/realms/{realm}/identity-provider/instances/{alias}/reload-keys	get		Identity Providers
+/admin/realms/{realm}/identity-provider/providers/{provider_id}	get		Identity Providers
+/admin/realms/{realm}/identity-provider/upload-certificate	post		Client Attribute Certificate
+/admin/realms/{realm}/keys	get		Key
+/admin/realms/{realm}/localization	get		Realms Admin
+/admin/realms/{realm}/localization/{locale}	get		Realms Admin
+/admin/realms/{realm}/localization/{locale}	post		Realms Admin
+/admin/realms/{realm}/localization/{locale}	delete		Realms Admin
+/admin/realms/{realm}/localization/{locale}/{key}	get		Realms Admin
+/admin/realms/{realm}/localization/{locale}/{key}	put		Realms Admin
+/admin/realms/{realm}/localization/{locale}/{key}	delete		Realms Admin
+/admin/realms/{realm}/logout-all	post		Realms Admin
+/admin/realms/{realm}/organizations	get		Organizations
+/admin/realms/{realm}/organizations	post		Organizations
+/admin/realms/{realm}/organizations/count	get		Organizations
+/admin/realms/{realm}/organizations/members/{member-id}/organizations	get		Organizations
+/admin/realms/{realm}/organizations/{org-id}	get		Organizations
+/admin/realms/{realm}/organizations/{org-id}	put		Organizations
+/admin/realms/{realm}/organizations/{org-id}	delete		Organizations
+/admin/realms/{realm}/organizations/{org-id}/groups	get		Organizations
+/admin/realms/{realm}/organizations/{org-id}/groups	post		Organizations
+/admin/realms/{realm}/organizations/{org-id}/groups/group-by-path/{path}	get		Organizations
+/admin/realms/{realm}/organizations/{org-id}/groups/{group-id}	get		Organizations
+/admin/realms/{realm}/organizations/{org-id}/groups/{group-id}	put		Organizations
+/admin/realms/{realm}/organizations/{org-id}/groups/{group-id}	delete		Organizations
+/admin/realms/{realm}/organizations/{org-id}/groups/{group-id}/children	get		Organizations
+/admin/realms/{realm}/organizations/{org-id}/groups/{group-id}/children	post		Organizations
+/admin/realms/{realm}/organizations/{org-id}/groups/{group-id}/members	get		Organizations
+/admin/realms/{realm}/organizations/{org-id}/groups/{group-id}/members/{userId}	put		Organizations
+/admin/realms/{realm}/organizations/{org-id}/groups/{group-id}/members/{userId}	delete		Organizations
+/admin/realms/{realm}/organizations/{org-id}/identity-providers	get		Organizations
+/admin/realms/{realm}/organizations/{org-id}/identity-providers	post		Organizations
+/admin/realms/{realm}/organizations/{org-id}/identity-providers/{alias}	get		Organizations
+/admin/realms/{realm}/organizations/{org-id}/identity-providers/{alias}	delete		Organizations
+/admin/realms/{realm}/organizations/{org-id}/identity-providers/{alias}/groups	get		Organizations
+/admin/realms/{realm}/organizations/{org-id}/invitations	get		Organizations
+/admin/realms/{realm}/organizations/{org-id}/invitations/{id}	get		Organizations
+/admin/realms/{realm}/organizations/{org-id}/invitations/{id}	delete		Organizations
+/admin/realms/{realm}/organizations/{org-id}/invitations/{id}/resend	post		Organizations
+/admin/realms/{realm}/organizations/{org-id}/members	get		Organizations
+/admin/realms/{realm}/organizations/{org-id}/members	post		Organizations
+/admin/realms/{realm}/organizations/{org-id}/members/count	get		Organizations
+/admin/realms/{realm}/organizations/{org-id}/members/invite-existing-user	post		Organizations
+/admin/realms/{realm}/organizations/{org-id}/members/invite-user	post		Organizations
+/admin/realms/{realm}/organizations/{org-id}/members/{member-id}	get		Organizations
+/admin/realms/{realm}/organizations/{org-id}/members/{member-id}	delete		Organizations
+/admin/realms/{realm}/organizations/{org-id}/members/{member-id}/groups	get		Organizations
+/admin/realms/{realm}/organizations/{org-id}/members/{member-id}/organizations	get		Organizations
+/admin/realms/{realm}/partial-export	post		Realms Admin
+/admin/realms/{realm}/partialImport	post		Realms Admin
+/admin/realms/{realm}/push-revocation	post		Realms Admin
+/admin/realms/{realm}/roles	get		Roles
+/admin/realms/{realm}/roles	post		Roles
+/admin/realms/{realm}/roles-by-id/{role-id}	get		Roles (by ID)
+/admin/realms/{realm}/roles-by-id/{role-id}	put		Roles (by ID)
+/admin/realms/{realm}/roles-by-id/{role-id}	delete		Roles (by ID)
+/admin/realms/{realm}/roles-by-id/{role-id}/composites	get		Roles (by ID)
+/admin/realms/{realm}/roles-by-id/{role-id}/composites	post		Roles (by ID)
+/admin/realms/{realm}/roles-by-id/{role-id}/composites	delete		Roles (by ID)
+/admin/realms/{realm}/roles-by-id/{role-id}/composites/clients/{clientUuid}	get		Roles (by ID)
+/admin/realms/{realm}/roles-by-id/{role-id}/composites/realm	get		Roles (by ID)
+/admin/realms/{realm}/roles-by-id/{role-id}/management/permissions	get		Roles (by ID)
+/admin/realms/{realm}/roles-by-id/{role-id}/management/permissions	put		Roles (by ID)
+/admin/realms/{realm}/roles/{role-name}	get		Roles
+/admin/realms/{realm}/roles/{role-name}	put		Roles
+/admin/realms/{realm}/roles/{role-name}	delete		Roles
+/admin/realms/{realm}/roles/{role-name}/composites	get		Roles
+/admin/realms/{realm}/roles/{role-name}/composites	post		Roles
+/admin/realms/{realm}/roles/{role-name}/composites	delete		Roles
+/admin/realms/{realm}/roles/{role-name}/composites/clients/{targetClientUuid}	get		Roles
+/admin/realms/{realm}/roles/{role-name}/composites/realm	get		Roles
+/admin/realms/{realm}/roles/{role-name}/groups	get		Roles
+/admin/realms/{realm}/roles/{role-name}/management/permissions	get		Roles
+/admin/realms/{realm}/roles/{role-name}/management/permissions	put		Roles
+/admin/realms/{realm}/roles/{role-name}/users	get		Roles
+/admin/realms/{realm}/sessions/{session}	delete		Realms Admin
+/admin/realms/{realm}/testSMTPConnection	post		Realms Admin
+/admin/realms/{realm}/users	get		Users
+/admin/realms/{realm}/users	post		Users
+/admin/realms/{realm}/users-management-permissions	get		Realms Admin
+/admin/realms/{realm}/users-management-permissions	put		Realms Admin
+/admin/realms/{realm}/users/count	get		Users
+/admin/realms/{realm}/users/profile	get		Users
+/admin/realms/{realm}/users/profile	put		Users
+/admin/realms/{realm}/users/profile/metadata	get		Users
+/admin/realms/{realm}/users/{user-id}	get		Users
+/admin/realms/{realm}/users/{user-id}	put		Users
+/admin/realms/{realm}/users/{user-id}	delete		Users
+/admin/realms/{realm}/users/{user-id}/configured-user-storage-credential-types	get		Users
+/admin/realms/{realm}/users/{user-id}/consents	get		Users
+/admin/realms/{realm}/users/{user-id}/consents/{client}	delete		Users
+/admin/realms/{realm}/users/{user-id}/credentials	get		Users
+/admin/realms/{realm}/users/{user-id}/credentials/{credentialId}	delete		Users
+/admin/realms/{realm}/users/{user-id}/credentials/{credentialId}/moveAfter/{newPreviousCredentialId}	post		Users
+/admin/realms/{realm}/users/{user-id}/credentials/{credentialId}/moveToFirst	post		Users
+/admin/realms/{realm}/users/{user-id}/credentials/{credentialId}/userLabel	put		Users
+/admin/realms/{realm}/users/{user-id}/disable-credential-types	put		Users
+/admin/realms/{realm}/users/{user-id}/execute-actions-email	put		Users
+/admin/realms/{realm}/users/{user-id}/federated-identity	get		Users
+/admin/realms/{realm}/users/{user-id}/federated-identity/{provider}	post		Users
+/admin/realms/{realm}/users/{user-id}/federated-identity/{provider}	delete		Users
+/admin/realms/{realm}/users/{user-id}/groups	get		Users
+/admin/realms/{realm}/users/{user-id}/groups/count	get		Users
+/admin/realms/{realm}/users/{user-id}/groups/{groupId}	put		Users
+/admin/realms/{realm}/users/{user-id}/groups/{groupId}	delete		Users
+/admin/realms/{realm}/users/{user-id}/impersonation	post		Users
+/admin/realms/{realm}/users/{user-id}/logout	post		Users
+/admin/realms/{realm}/users/{user-id}/offline-sessions/{clientUuid}	get		Users
+/admin/realms/{realm}/users/{user-id}/reset-password	put		Users
+/admin/realms/{realm}/users/{user-id}/reset-password-email	put		Users
+/admin/realms/{realm}/users/{user-id}/role-mappings	get		Role Mapper
+/admin/realms/{realm}/users/{user-id}/role-mappings/clients/{client-id}	get		Client Role Mappings
+/admin/realms/{realm}/users/{user-id}/role-mappings/clients/{client-id}	post		Client Role Mappings
+/admin/realms/{realm}/users/{user-id}/role-mappings/clients/{client-id}	delete		Client Role Mappings
+/admin/realms/{realm}/users/{user-id}/role-mappings/clients/{client-id}/available	get		Client Role Mappings
+/admin/realms/{realm}/users/{user-id}/role-mappings/clients/{client-id}/composite	get		Client Role Mappings
+/admin/realms/{realm}/users/{user-id}/role-mappings/realm	get		Role Mapper
+/admin/realms/{realm}/users/{user-id}/role-mappings/realm	post		Role Mapper
+/admin/realms/{realm}/users/{user-id}/role-mappings/realm	delete		Role Mapper
+/admin/realms/{realm}/users/{user-id}/role-mappings/realm/available	get		Role Mapper
+/admin/realms/{realm}/users/{user-id}/role-mappings/realm/composite	get		Role Mapper
+/admin/realms/{realm}/users/{user-id}/send-verify-email	put		Users
+/admin/realms/{realm}/users/{user-id}/sessions	get		Users
+/admin/realms/{realm}/users/{user-id}/unmanagedAttributes	get		Users
+/admin/realms/{realm}/workflows	get		Workflows
+/admin/realms/{realm}/workflows	post		Workflows
+/admin/realms/{realm}/workflows/migrate	post		Workflows
+/admin/realms/{realm}/workflows/scheduled/{resource-id}	get		Workflows
+/admin/realms/{realm}/workflows/{id}	get		Workflows
+/admin/realms/{realm}/workflows/{id}	put		Workflows
+/admin/realms/{realm}/workflows/{id}	delete		Workflows
+/admin/realms/{realm}/workflows/{id}/activate/{type}/{resourceId}	post		Workflows
+/admin/realms/{realm}/workflows/{id}/deactivate/{type}/{resourceId}	post		Workflows

@@ -8,7 +8,7 @@ import (
 
 	"github.com/mark3labs/mcp-go/mcp"
 
-	"example.invalid/mcp-template-module-placeholder/pkg/toolset"
+	"github.com/futuretea/keycloak-mcp-server/pkg/toolset"
 )
 
 const Domain = "example"
