@@ -12,7 +12,6 @@ concurrency:
 
 env:
   GO_VERSION: "1.25.10"
-  BINARY_NAME: "keycloak"
 
 defaults:
   run:
@@ -82,7 +81,7 @@ jobs:
       - name: Verify module
         run: go mod verify
       - name: Smoke CLI
-        run: ./bin/${BINARY_NAME} version
+        run: make smoke
 
   docker:
     name: Docker Build

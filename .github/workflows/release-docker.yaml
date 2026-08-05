@@ -77,7 +77,7 @@ jobs:
       - name: Build
         run: make build
       - name: Smoke CLI
-        run: ./bin/${BINARY_NAME} version
+        run: make smoke
 
   release:
     name: Publish Docker image

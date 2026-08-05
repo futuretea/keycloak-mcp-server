@@ -9,10 +9,16 @@ LDFLAGS := -X github.com/futuretea/keycloak-mcp-server/pkg/core/version.Version=
 
 -include release.mk
 
-.PHONY: build test e2e test-template-init lint format tidy ci clean docker coverage
+.PHONY: build test e2e test-template-init lint format tidy ci clean docker coverage smoke print-binary-name
 
 build:
 	go build -ldflags "$(LDFLAGS)" -o bin/$(BINARY_NAME) ./cmd/mcp-server
+
+smoke: build
+	./bin/$(BINARY_NAME) version
+
+print-binary-name:
+	@printf '%s\n' "$(BINARY_NAME)"
 
 test:
 	go test ./...

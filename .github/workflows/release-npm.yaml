@@ -11,7 +11,6 @@ concurrency:
 
 env:
   GO_VERSION: "1.25.10"
-  BINARY_NAME: "keycloak"
   NPM_PACKAGE_DIRECTORY: "futuretea-keycloak-mcp-server"
 
 defaults:
@@ -83,7 +82,7 @@ jobs:
       - name: Build
         run: make build
       - name: Smoke CLI
-        run: ./bin/${BINARY_NAME} version
+        run: make smoke
 
   build-platform:
     name: Build ${{ matrix.goos }}/${{ matrix.goarch }}
@@ -105,6 +104,7 @@ jobs:
         env:
           RELEASE_VERSION: ${{ needs.validate-tag.outputs.version }}
         run: |
+          binary_name="$(make --no-print-directory print-binary-name)"
           suffix=''
           if [ '${{ matrix.goos }}' = windows ]; then suffix=.exe; fi
           mkdir -p dist
@@ -112,14 +112,15 @@ jobs:
             -X github.com/futuretea/keycloak-mcp-server/pkg/core/version.Version=${RELEASE_VERSION} \
             -X github.com/futuretea/keycloak-mcp-server/pkg/core/version.Commit=$(git rev-parse HEAD) \
             -X github.com/futuretea/keycloak-mcp-server/pkg/core/version.Date=$(git log -1 --format=%cI)" \
-            -o "dist/${BINARY_NAME}${suffix}" ./cmd/mcp-server
+            -o "dist/${binary_name}${suffix}" ./cmd/mcp-server
       - name: Stage npm platform package
         run: |
+          binary_name="$(make --no-print-directory print-binary-name)"
           suffix=''
           if [ '${{ matrix.goos }}' = windows ]; then suffix=.exe; fi
           package_dir="npm/${NPM_PACKAGE_DIRECTORY}-${{ matrix.goos }}-${{ matrix.goarch }}"
           mkdir -p "$package_dir/bin"
-          cp "dist/${BINARY_NAME}${suffix}" "$package_dir/bin/${BINARY_NAME}${suffix}"
+          cp "dist/${binary_name}${suffix}" "$package_dir/bin/${binary_name}${suffix}"
       - name: Archive npm platform package
         run: >
           tar -C npm -czf dist/npm-${{ matrix.goos }}-${{ matrix.goarch }}.tar.gz
