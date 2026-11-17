@@ -3,12 +3,65 @@ package mcp
 import (
 	"context"
 	"errors"
+	"reflect"
 	"testing"
 
 	mcpprotocol "github.com/mark3labs/mcp-go/mcp"
 
 	"github.com/futuretea/keycloak-mcp-server/pkg/toolset"
 )
+
+func TestNewToolHandlerRejectsNonObjectArguments(t *testing.T) {
+	tests := []struct {
+		name     string
+		raw      any
+		wantCall bool
+		wantArgs map[string]any
+	}{
+		{name: "omitted", raw: nil, wantCall: true, wantArgs: map[string]any{}},
+		{name: "object", raw: map[string]any{"max": float64(1)}, wantCall: true, wantArgs: map[string]any{"max": float64(1)}},
+		{name: "nil map", raw: map[string]any(nil), wantCall: true, wantArgs: map[string]any{}},
+		{name: "array", raw: []any{}, wantCall: false},
+		{name: "string", raw: "text", wantCall: false},
+		{name: "number", raw: float64(1), wantCall: false},
+		{name: "bool", raw: true, wantCall: false},
+	}
+
+	for _, tt := range tests {
+		t.Run(tt.name, func(t *testing.T) {
+			called := false
+			var got map[string]any
+			handler := newToolHandler(toolset.ServerTool{
+				Handler: func(_ context.Context, params map[string]any) (string, error) {
+					called = true
+					got = params
+					return "ok", nil
+				},
+			})
+			result, err := handler(t.Context(), mcpprotocol.CallToolRequest{
+				Params: mcpprotocol.CallToolParams{Name: "read", Arguments: tt.raw},
+			})
+			if err != nil {
+				t.Fatalf("handler transport error = %v", err)
+			}
+			if called != tt.wantCall {
+				t.Fatalf("handler called = %v, want %v", called, tt.wantCall)
+			}
+			if tt.wantCall {
+				if result.IsError {
+					t.Fatalf("result error = %#v, want success", result)
+				}
+				if !reflect.DeepEqual(got, tt.wantArgs) {
+					t.Fatalf("handler args = %#v, want %#v", got, tt.wantArgs)
+				}
+				return
+			}
+			if !result.IsError {
+				t.Fatal("non-object arguments returned a successful tool result")
+			}
+		})
+	}
+}
 
 func TestNewToolHandlerReturnsErrorResult(t *testing.T) {
 	wantErr := errors.New("boom")

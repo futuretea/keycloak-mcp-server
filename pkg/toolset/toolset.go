@@ -38,10 +38,10 @@ type FilterOptions struct {
 
 // FilterTools applies enable/disable lists for tools and domains.
 func FilterTools(tools []ServerTool, opts FilterOptions) []ServerTool {
-	enabledTools := toSet(opts.EnabledTools)
-	disabledTools := toSet(opts.DisabledTools)
-	enabledDomains := toSet(opts.EnabledDomains)
-	disabledDomains := toSet(opts.DisabledDomains)
+	enabledTools, restrictTools := allowNames(opts.EnabledTools)
+	disabledTools := nameSet(opts.DisabledTools)
+	enabledDomains, restrictDomains := allowNames(opts.EnabledDomains)
+	disabledDomains := nameSet(opts.DisabledDomains)
 
 	filtered := make([]ServerTool, 0, len(tools))
 	for _, tool := range tools {
@@ -51,7 +51,7 @@ func FilterTools(tools []ServerTool, opts FilterOptions) []ServerTool {
 		if opts.ReadOnly && (tool.IsWrite || tool.IsSensitive || tool.IsGlobal) {
 			continue
 		}
-		if len(enabledTools) > 0 {
+		if restrictTools {
 			if _, ok := enabledTools[name]; !ok {
 				continue
 			}
@@ -59,7 +59,7 @@ func FilterTools(tools []ServerTool, opts FilterOptions) []ServerTool {
 		if _, ok := disabledTools[name]; ok {
 			continue
 		}
-		if len(enabledDomains) > 0 {
+		if restrictDomains {
 			if _, ok := enabledDomains[domain]; !ok {
 				continue
 			}
@@ -72,10 +72,14 @@ func FilterTools(tools []ServerTool, opts FilterOptions) []ServerTool {
 	return filtered
 }
 
-func toSet(values []string) map[string]struct{} {
+func allowNames(values []string) (map[string]struct{}, bool) {
 	if len(values) == 0 {
-		return nil
+		return nil, false
 	}
+	return nameSet(values), true
+}
+
+func nameSet(values []string) map[string]struct{} {
 	set := make(map[string]struct{}, len(values))
 	for _, value := range values {
 		value = strings.TrimSpace(value)
