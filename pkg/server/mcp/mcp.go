@@ -143,14 +143,28 @@ func (s *Server) registerTool(tool toolset.ServerTool) {
 
 func newToolHandler(tool toolset.ServerTool) server.ToolHandlerFunc {
 	return func(ctx context.Context, request mcp.CallToolRequest) (*mcp.CallToolResult, error) {
-		params := request.GetArguments()
-		if params == nil {
-			params = map[string]any{}
+		params, err := objectArguments(request.GetRawArguments())
+		if err != nil {
+			return NewTextResult("", err), nil
 		}
 
 		result, err := tool.Handler(ctx, params)
 		return NewTextResult(result, err), nil
 	}
+}
+
+func objectArguments(raw any) (map[string]any, error) {
+	if raw == nil {
+		return map[string]any{}, nil
+	}
+	params, ok := raw.(map[string]any)
+	if !ok {
+		return nil, fmt.Errorf("arguments must be an object")
+	}
+	if params == nil {
+		return map[string]any{}, nil
+	}
+	return params, nil
 }
 
 // GetEnabledTools returns registered tool names.

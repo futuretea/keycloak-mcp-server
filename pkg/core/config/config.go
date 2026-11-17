@@ -165,5 +165,8 @@ func normalizeStringSlice(values []string) []string {
 			normalized = append(normalized, value)
 		}
 	}
+	if len(normalized) == 0 && len(values) > 0 {
+		return []string{""}
+	}
 	return normalized
 }
