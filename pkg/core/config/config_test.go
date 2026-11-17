@@ -8,10 +8,12 @@ import (
 	"strings"
 	"testing"
 
+	"github.com/mark3labs/mcp-go/mcp"
 	"github.com/spf13/pflag"
 	"github.com/spf13/viper"
 
 	"github.com/futuretea/keycloak-mcp-server/pkg/core/config"
+	"github.com/futuretea/keycloak-mcp-server/pkg/toolset"
 )
 
 func TestLoadConfigDefaults(t *testing.T) {
@@ -177,6 +179,188 @@ func testOpaqueValue(t *testing.T) string {
 		t.Fatalf("generate test-only opaque value: %v", err)
 	}
 	return hex.EncodeToString(payload)
+}
+
+func TestLoadConfigBlankAllowListDoesNotWiden(t *testing.T) {
+	configPath := filepath.Join(t.TempDir(), "config.yaml")
+	body := "enabled_tools:\n  - \"\"\n  - \"   \"\nenabled_domains:\n  - \" \"\ndisabled_tools:\n  - \"\"\n  - \"  \"\n"
+	if err := os.WriteFile(configPath, []byte(body), 0o600); err != nil {
+		t.Fatalf("write config: %v", err)
+	}
+	cfg, err := config.LoadConfig(configPath, viper.New())
+	if err != nil {
+		t.Fatalf("LoadConfig: %v", err)
+	}
+	if got := filteredNames(cfg); len(got) != 0 {
+		t.Fatalf("blank allow list exposed %v", got)
+	}
+}
+
+func TestLoadConfigEmptyAllowListStaysOpen(t *testing.T) {
+	configPath := filepath.Join(t.TempDir(), "config.yaml")
+	body := "enabled_tools: []\nenabled_domains: []\ndisabled_tools:\n  - \"\"\n  - \"  \"\ndisabled_domains:\n  - \" \"\n"
+	if err := os.WriteFile(configPath, []byte(body), 0o600); err != nil {
+		t.Fatalf("write config: %v", err)
+	}
+	cfg, err := config.LoadConfig(configPath, viper.New())
+	if err != nil {
+		t.Fatalf("LoadConfig: %v", err)
+	}
+	if got, want := filteredNames(cfg), []string{"read", "other"}; !sameNames(got, want) {
+		t.Fatalf("empty allow list = %v, want %v", got, want)
+	}
+}
+
+func TestLoadConfigWhitespaceEnvAllowListDoesNotWiden(t *testing.T) {
+	configPath := filepath.Join(t.TempDir(), "config.yaml")
+	if err := os.WriteFile(configPath, []byte("enabled_tools:\n  - read\n"), 0o600); err != nil {
+		t.Fatalf("write config: %v", err)
+	}
+	t.Setenv("MCP_ENABLED_TOOLS", "   ")
+	cfg, err := config.LoadConfig(configPath, viper.New())
+	if err != nil {
+		t.Fatalf("LoadConfig: %v", err)
+	}
+	if got := filteredNames(cfg); len(got) != 0 {
+		t.Fatalf("whitespace environment allow list exposed %v", got)
+	}
+}
+
+func TestLoadConfigEmptyEnvKeepsFileAllowList(t *testing.T) {
+	configPath := filepath.Join(t.TempDir(), "config.yaml")
+	if err := os.WriteFile(configPath, []byte("enabled_tools:\n  - read\nread_only: false\n"), 0o600); err != nil {
+		t.Fatalf("write config: %v", err)
+	}
+	t.Setenv("MCP_ENABLED_TOOLS", "")
+	t.Setenv("MCP_READ_ONLY", "")
+	cfg, err := config.LoadConfig(configPath, viper.New())
+	if err != nil {
+		t.Fatalf("LoadConfig: %v", err)
+	}
+	if cfg.ReadOnly {
+		t.Fatal("empty MCP_READ_ONLY overrode file read_only false")
+	}
+	if got, want := filteredNames(cfg), []string{"read"}; !sameNames(got, want) {
+		t.Fatalf("empty environment allow list = %v, want %v", got, want)
+	}
+}
+
+func TestLoadConfigUnchangedFlagsKeepFileFilters(t *testing.T) {
+	configPath := filepath.Join(t.TempDir(), "config.yaml")
+	if err := os.WriteFile(configPath, []byte("enabled_tools:\n  - read\nread_only: false\n"), 0o600); err != nil {
+		t.Fatalf("write config: %v", err)
+	}
+	cfg := loadConfigWithFlags(t, configPath, nil)
+	if cfg.ReadOnly {
+		t.Fatal("unchanged read-only flag overrode file read_only false")
+	}
+	if got, want := filteredNames(cfg), []string{"read"}; !sameNames(got, want) {
+		t.Fatalf("unchanged enabled-tools flag = %v, want %v", got, want)
+	}
+}
+
+func TestLoadConfigChangedFlagsBeatEnvironment(t *testing.T) {
+	configPath := filepath.Join(t.TempDir(), "config.yaml")
+	if err := os.WriteFile(configPath, []byte("enabled_tools:\n  - other\nread_only: false\n"), 0o600); err != nil {
+		t.Fatalf("write config: %v", err)
+	}
+	t.Setenv("MCP_ENABLED_TOOLS", "read")
+	t.Setenv("MCP_READ_ONLY", "false")
+	cfg := loadConfigWithFlags(t, configPath, map[string]string{
+		"enabled-tools": "other",
+		"read-only":     "true",
+	})
+	if !cfg.ReadOnly {
+		t.Fatal("changed read-only flag did not override the environment")
+	}
+	if got, want := filteredNames(cfg), []string{"other"}; !sameNames(got, want) {
+		t.Fatalf("changed enabled-tools flag = %v, want %v", got, want)
+	}
+}
+
+func TestLoadConfigEmptyChangedFlagStaysOpen(t *testing.T) {
+	configPath := filepath.Join(t.TempDir(), "config.yaml")
+	if err := os.WriteFile(configPath, []byte("enabled_tools:\n  - read\n"), 0o600); err != nil {
+		t.Fatalf("write config: %v", err)
+	}
+	cfg := loadConfigWithFlags(t, configPath, map[string]string{"enabled-tools": ""})
+	if got, want := filteredNames(cfg), []string{"read", "other"}; !sameNames(got, want) {
+		t.Fatalf("empty changed flag = %v, want %v", got, want)
+	}
+}
+
+func TestLoadConfigBlankChangedFlagDoesNotWiden(t *testing.T) {
+	configPath := filepath.Join(t.TempDir(), "config.yaml")
+	if err := os.WriteFile(configPath, []byte("enabled_tools:\n  - read\n"), 0o600); err != nil {
+		t.Fatalf("write config: %v", err)
+	}
+	cfg := loadConfigWithFlags(t, configPath, map[string]string{"enabled-tools": " "})
+	if got := filteredNames(cfg); len(got) != 0 {
+		t.Fatalf("blank changed flag exposed %v", got)
+	}
+}
+
+func filteredNames(cfg *config.StaticConfig) []string {
+	filtered := toolset.FilterTools([]toolset.ServerTool{
+		{Tool: mcp.NewTool("read"), Domain: "users"},
+		{Tool: mcp.NewTool("other"), Domain: "clients"},
+	}, toolset.FilterOptions{
+		ReadOnly:        cfg.ReadOnly,
+		EnabledTools:    cfg.EnabledTools,
+		DisabledTools:   cfg.DisabledTools,
+		EnabledDomains:  cfg.EnabledDomains,
+		DisabledDomains: cfg.DisabledDomains,
+	})
+	names := make([]string, 0, len(filtered))
+	for _, tool := range filtered {
+		names = append(names, tool.Tool.Name)
+	}
+	return names
+}
+
+func sameNames(got, want []string) bool {
+	if len(got) != len(want) {
+		return false
+	}
+	for i := range want {
+		if got[i] != want[i] {
+			return false
+		}
+	}
+	return true
+}
+
+func loadConfigWithFlags(t *testing.T, configPath string, values map[string]string) *config.StaticConfig {
+	t.Helper()
+	flags := pflag.NewFlagSet("config", pflag.ContinueOnError)
+	flags.StringSlice("enabled-tools", []string{}, "")
+	flags.StringSlice("disabled-tools", []string{}, "")
+	flags.StringSlice("enable-domains", []string{}, "")
+	flags.StringSlice("disable-domains", []string{}, "")
+	flags.Bool("read-only", true, "")
+	for name, value := range values {
+		if err := flags.Set(name, value); err != nil {
+			t.Fatalf("set flag %s: %v", name, err)
+		}
+	}
+	v := viper.New()
+	bindings := map[string]string{
+		"enabled_tools":    "enabled-tools",
+		"disabled_tools":   "disabled-tools",
+		"enabled_domains":  "enable-domains",
+		"disabled_domains": "disable-domains",
+		"read_only":        "read-only",
+	}
+	for key, name := range bindings {
+		if err := v.BindPFlag(key, flags.Lookup(name)); err != nil {
+			t.Fatalf("bind flag %s: %v", name, err)
+		}
+	}
+	cfg, err := config.LoadConfig(configPath, v)
+	if err != nil {
+		t.Fatalf("LoadConfig: %v", err)
+	}
+	return cfg
 }
 
 func TestGetListenAddress(t *testing.T) {

@@ -46,6 +46,48 @@ func TestNewServerRequiresStaticConfig(t *testing.T) {
 	}
 }
 
+func TestNewServerBlankAllowListRegistersNoTools(t *testing.T) {
+	toolsets := []toolset.Toolset{staticToolset{tools: []toolset.ServerTool{
+		{Tool: mcp.NewTool("read"), Handler: noOpHandler, Domain: "users"},
+		{Tool: mcp.NewTool("other"), Handler: noOpHandler, Domain: "clients"},
+	}}}
+	tests := []struct {
+		name string
+		cfg  config.StaticConfig
+	}{
+		{name: "blank tools", cfg: config.StaticConfig{LogLevel: "info", EnabledTools: []string{"", "  "}}},
+		{name: "blank domains", cfg: config.StaticConfig{LogLevel: "info", EnabledDomains: []string{" "}}},
+	}
+	for _, tt := range tests {
+		t.Run(tt.name, func(t *testing.T) {
+			_, err := mcpserver.NewServer(mcpserver.Configuration{
+				StaticConfig: &tt.cfg,
+				Toolsets:     toolsets,
+			})
+			if err == nil || !strings.Contains(err.Error(), "no tools registered") {
+				t.Fatalf("NewServer error = %v, want no tools registered", err)
+			}
+		})
+	}
+}
+
+func TestNewServerTrimsNamedAllowList(t *testing.T) {
+	server, err := mcpserver.NewServer(mcpserver.Configuration{
+		StaticConfig: &config.StaticConfig{LogLevel: "info", EnabledTools: []string{"", " read "}},
+		Toolsets: []toolset.Toolset{staticToolset{tools: []toolset.ServerTool{
+			{Tool: mcp.NewTool("read"), Handler: noOpHandler, Domain: "users"},
+			{Tool: mcp.NewTool("other"), Handler: noOpHandler, Domain: "clients"},
+		}}},
+	})
+	if err != nil {
+		t.Fatalf("NewServer: %v", err)
+	}
+	defer server.Close()
+	if got := server.GetEnabledTools(); len(got) != 1 || got[0] != "read" {
+		t.Fatalf("enabled tools = %v, want [read]", got)
+	}
+}
+
 func TestNewServerRejectsEmptyToolFilter(t *testing.T) {
 	_, err := mcpserver.NewServer(mcpserver.Configuration{
 		StaticConfig: &config.StaticConfig{

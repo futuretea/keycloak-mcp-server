@@ -56,6 +56,34 @@ func TestFilterTools(t *testing.T) {
 			opts: toolset.FilterOptions{EnabledTools: []string{"read-secret", "global-read"}},
 			want: []string{"read-secret", "global-read"},
 		},
+		{
+			name: "empty allow lists stay open",
+			opts: toolset.FilterOptions{EnabledTools: []string{}, EnabledDomains: []string{}},
+			want: []string{"echo", "ping", "other", "write", "read-secret", "global-read"},
+		},
+		{
+			name: "blank tool allow list matches nothing",
+			opts: toolset.FilterOptions{EnabledTools: []string{"", "  "}},
+			want: nil,
+		},
+		{
+			name: "blank domain allow list matches nothing",
+			opts: toolset.FilterOptions{EnabledDomains: []string{" "}},
+			want: nil,
+		},
+		{
+			name: "blank deny lists stay open",
+			opts: toolset.FilterOptions{
+				DisabledTools:   []string{"", "   "},
+				DisabledDomains: []string{" ", ""},
+			},
+			want: []string{"echo", "ping", "other", "write", "read-secret", "global-read"},
+		},
+		{
+			name: "blank entries do not erase a real tool name",
+			opts: toolset.FilterOptions{EnabledTools: []string{"", " ping "}},
+			want: []string{"ping"},
+		},
 	}
 
 	for _, tt := range tests {
