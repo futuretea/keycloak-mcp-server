@@ -133,9 +133,14 @@ func LoadConfig(configPath string, v *viper.Viper) (*StaticConfig, error) {
 	cfg.KeycloakRealm = strings.TrimSpace(cfg.KeycloakRealm)
 	cfg.KeycloakClientID = strings.TrimSpace(cfg.KeycloakClientID)
 	cfg.EnabledTools = normalizeStringSlice(cfg.EnabledTools)
-	cfg.DisabledTools = normalizeStringSlice(cfg.DisabledTools)
 	cfg.EnabledDomains = normalizeStringSlice(cfg.EnabledDomains)
-	cfg.DisabledDomains = normalizeStringSlice(cfg.DisabledDomains)
+	var err error
+	if cfg.DisabledTools, err = normalizeDenyList("disabled_tools", cfg.DisabledTools); err != nil {
+		return nil, err
+	}
+	if cfg.DisabledDomains, err = normalizeDenyList("disabled_domains", cfg.DisabledDomains); err != nil {
+		return nil, err
+	}
 
 	if err := cfg.Validate(); err != nil {
 		return nil, err
@@ -158,15 +163,28 @@ func bindEnvironment(v *viper.Viper) error {
 }
 
 func normalizeStringSlice(values []string) []string {
-	normalized := make([]string, 0, len(values))
+	names, blankOnly := trimNames(values)
+	if blankOnly {
+		return []string{""}
+	}
+	return names
+}
+
+func normalizeDenyList(field string, values []string) ([]string, error) {
+	names, blankOnly := trimNames(values)
+	if blankOnly {
+		return nil, fmt.Errorf("%s cannot contain only blank entries", field)
+	}
+	return names, nil
+}
+
+func trimNames(values []string) ([]string, bool) {
+	names := make([]string, 0, len(values))
 	for _, value := range values {
 		value = strings.TrimSpace(value)
 		if value != "" {
-			normalized = append(normalized, value)
+			names = append(names, value)
 		}
 	}
-	if len(normalized) == 0 && len(values) > 0 {
-		return []string{""}
-	}
-	return normalized
+	return names, len(values) > 0 && len(names) == 0
 }

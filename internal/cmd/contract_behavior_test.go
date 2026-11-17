@@ -21,8 +21,8 @@ func TestBinaryContract(t *testing.T) {
 	t.Run("cli filters", func(t *testing.T) {
 		assertToolListed(t, bin, true, "tools", "list")
 		assertToolListed(t, bin, true, "tools", "list", "--enabled-tools", "")
-		assertToolListed(t, bin, true, "tools", "list", "--disabled-tools", " ")
-		assertToolListed(t, bin, true, "tools", "list", "--disable-domains", " ")
+		assertBlankDenyRejected(t, bin, "tools", "list", "--disabled-tools", " ")
+		assertBlankDenyRejected(t, bin, "tools", "list", "--disable-domains", " ")
 		assertToolListed(t, bin, true, "tools", "list", "--enabled-tools", "keycloak_users_get_users")
 		assertToolListed(t, bin, false, "tools", "list", "--enabled-tools", " ")
 		assertToolListed(t, bin, false, "tools", "list", "--enabled-tools", ",")
@@ -34,7 +34,7 @@ func TestBinaryContract(t *testing.T) {
 			t.Fatal(err)
 		}
 		emptyPath := filepath.Join(dir, "empty.yaml")
-		if err := os.WriteFile(emptyPath, []byte("enabled_tools: []\ndisabled_tools:\n  - \" \"\n"), 0o600); err != nil {
+		if err := os.WriteFile(emptyPath, []byte("enabled_tools: []\ndisabled_tools: []\n"), 0o600); err != nil {
 			t.Fatal(err)
 		}
 		namedPath := filepath.Join(dir, "named.yaml")
@@ -71,6 +71,15 @@ func assertToolListed(t *testing.T, bin string, want bool, args ...string) {
 	got := strings.Contains(string(out), "keycloak_users_get_users")
 	if got != want {
 		t.Fatalf("%s listed users=%v, want %v\n%s", strings.Join(args, " "), got, want, out)
+	}
+}
+
+func assertBlankDenyRejected(t *testing.T, bin string, args ...string) {
+	t.Helper()
+	cmd := exec.Command(bin, args...)
+	out, err := cmd.CombinedOutput()
+	if err == nil || !strings.Contains(string(out), "blank") {
+		t.Fatalf("%s error = %v, output = %s", strings.Join(args, " "), err, out)
 	}
 }
 

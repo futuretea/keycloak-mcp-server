@@ -183,7 +183,7 @@ func testOpaqueValue(t *testing.T) string {
 
 func TestLoadConfigBlankAllowListDoesNotWiden(t *testing.T) {
 	configPath := filepath.Join(t.TempDir(), "config.yaml")
-	body := "enabled_tools:\n  - \"\"\n  - \"   \"\nenabled_domains:\n  - \" \"\ndisabled_tools:\n  - \"\"\n  - \"  \"\n"
+	body := "enabled_tools:\n  - \"\"\n  - \"   \"\nenabled_domains:\n  - \" \"\n"
 	if err := os.WriteFile(configPath, []byte(body), 0o600); err != nil {
 		t.Fatalf("write config: %v", err)
 	}
@@ -198,7 +198,7 @@ func TestLoadConfigBlankAllowListDoesNotWiden(t *testing.T) {
 
 func TestLoadConfigEmptyAllowListStaysOpen(t *testing.T) {
 	configPath := filepath.Join(t.TempDir(), "config.yaml")
-	body := "enabled_tools: []\nenabled_domains: []\ndisabled_tools:\n  - \"\"\n  - \"  \"\ndisabled_domains:\n  - \" \"\n"
+	body := "enabled_tools: []\nenabled_domains: []\ndisabled_tools: []\ndisabled_domains: []\n"
 	if err := os.WriteFile(configPath, []byte(body), 0o600); err != nil {
 		t.Fatalf("write config: %v", err)
 	}
